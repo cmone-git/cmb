@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Appointments | STRACARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"/>
+</head>
+<body>
+
+<div class="module-container" id="appointment-module">
+    
+    <style>
+        :root {
+            /* Zoho Blue Theme */
+            --primary: #0062FF; 
+            --primary-light: #eaf1ff;
+            --bg: #F8F9FA;
+            --surface: #ffffff;
+            --text-main: #0a0a0a;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --grey-med: #D9D9D9;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --success: #10B981;
+            --danger: #EF4444;
+            --secondary: #64748B;
+            --warning: #F59E0B;
+        }
+
+        #appointment-module { font-family: 'Inter', sans-serif; width: 100%; max-width: 1200px; margin: 0 auto; padding: 16px;}
+        
+        #appointment-module .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Action Bar */
+        .action-bar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+        .action-bar .btn-action { background: var(--surface); color: var(--primary); border: 1px solid var(--primary); padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .action-bar .btn-action:hover { background: var(--primary); color: white; }
+        .action-bar .btn-danger { background: var(--surface); color: var(--danger); border: 1px solid var(--danger); padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .action-bar .btn-danger:hover { background: var(--danger); color: white; }
+
+        /* Form styling (Hidden by default) */
+        #aptFormCard { display: none; background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 24px; animation: fadeIn 0.3s ease;}
+        #aptFormCard.active { display: block; }
+        
+        #appointment-module .form-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+        #appointment-module .input-group { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; }
+        @media (min-width: 768px) { #appointment-module .input-group { grid-template-columns: 1fr 1fr; } }
+        @media (min-width: 1024px) { #appointment-module .input-group.three-cols { grid-template-columns: 1fr 1fr 1fr; } }
+
+        #appointment-module .form-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px; color: var(--text-main); background: #FAFAFA; outline: none; transition: border 0.2s; appearance: auto; box-sizing: border-box;}
+        #appointment-module .form-input:focus { border-color: var(--primary); background: var(--surface); }
+        
+        #appointment-module .btn-primary { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+        #appointment-module .btn-outline { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        
+        /* Timesheet CSS */
+        .timesheet-wrapper { display: none; background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow-x: auto; margin-bottom: 24px; padding: 16px; animation: fadeIn 0.3s ease;}
+        .timesheet-wrapper.active { display: block; }
+        .timesheet-table { width: 100%; min-width: 1000px; border-collapse: collapse; text-align: center; }
+        .timesheet-table th { background: var(--primary-light); color: var(--primary); font-size: 11px; padding: 10px 4px; border: 1px solid var(--border); }
+        .timesheet-table td { border: 1px solid var(--border); padding: 6px; font-size: 11px; vertical-align: top; height: 60px; width: 7.1%; }
+        .timesheet-table .ts-doctor { font-weight: bold; background: #fafafa; text-align: left; padding-left: 12px; width: 15%; color: var(--text-main); }
+        .ts-booking { background: var(--primary); color: white; padding: 4px; border-radius: 4px; margin-bottom: 4px; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Data Table CSS */
+        #appointment-module .table-container { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
+        #appointment-module .table-responsive { width: 100%; overflow-x: auto; }
+        #appointment-module .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 16px; }
+        #appointment-module .saas-table { width: 100%; min-width: 950px; border-collapse: collapse; text-align: left; }
+        #appointment-module .saas-table th { padding: 12px 16px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; background: #FAFAFA; border-bottom: 1px solid var(--border); }
+        #appointment-module .saas-table td { padding: 16px; font-size: 14px; font-weight: 500; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; white-space: nowrap; }
+        .badge-pending { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .badge-reported { background: rgba(0, 98, 255, 0.1); color: var(--primary); } 
+        .badge-completed { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .badge-rescheduled { background: rgba(100, 116, 139, 0.1); color: var(--secondary); }
+        .badge-regular { background: rgba(245, 158, 11, 0.15); color: var(--warning); font-size: 10px; padding: 2px 6px; margin-left: 6px; }
+
+        .cta-link { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #FAFAFA; border: 1px solid var(--border); transition: 0.2s; text-decoration: none; color: inherit; cursor: pointer;}
+        .cta-link:hover { background: var(--surface); transform: translateY(-2px); }
+
+        #bulk-reschedule-container { display: none; margin-bottom: 16px; }
+        #bulk-reschedule-container.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Notes Modal Styles */
+        .notes-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; padding: 20px; }
+        .notes-modal-content { background: white; width: 100%; max-width: 600px; border-radius: 12px; padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .notes-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
+    </style>
+
+    <div class="section-title">
+        <h2 style="margin: 0;">Schedule Management</h2>
+    </div>
+
+    <div class="action-bar no-print">
+        <button class="btn-action" onclick="window.toggleSection('aptFormCard')"><span class="material-symbols-rounded">add_circle</span> Book Appointment</button>
+        <button class="btn-action" onclick="window.toggleTimesheet()"><span class="material-symbols-rounded">calendar_view_day</span> View Timesheet</button>
+        <button class="btn-action" onclick="window.openBulkReschedule()"><span class="material-symbols-rounded">content_copy</span> Bulk Copy to Date</button>
+        <button class="btn-danger" onclick="window.executeBulkDelete()"><span class="material-symbols-rounded">delete</span> Bulk Delete Selected</button>
+        <button class="btn-outline" onclick="window.exportAptPDF()" style="margin-left: auto;"><span class="material-symbols-rounded" style="color: var(--primary);">picture_as_pdf</span> Export PDF</button>
+    </div>
+
+    <div class="form-card no-print" id="aptFormCard">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+            <h4 style="color: var(--primary); margin: 0;">New Appointment Details</h4>
+            <button class="btn-outline" onclick="window.toggleSection('aptFormCard')" style="border:none; padding:4px;"><span class="material-symbols-rounded">close</span></button>
+        </div>
+        <form id="add-appointment-form" onsubmit="event.preventDefault();">
+            <input type="hidden" id="aptDocId" value="">
+            
+            <div class="input-group three-cols">
+                <div>
+                    <label class="form-label">Patient Mobile *</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="tel" id="aptMobile" class="form-input" placeholder="10-digit number" maxlength="10" required>
+                        <button type="button" class="btn-primary" id="verifyAptBtn" onclick="window.verifyPatientMobile()" style="padding: 0 16px;">Check</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label">Patient Name *</label>
+                    <input type="text" id="aptName" class="form-input" placeholder="Full Name" required>
+                </div>
+                <div style="display: flex; gap: 16px;">
+                    <div style="flex: 1;">
+                        <label class="form-label">Age</label>
+                        <input type="number" id="aptAge" class="form-input" placeholder="Years">
+                    </div>
+                    <div style="flex: 1;">
+                        <label class="form-label">Category *</label>
+                        <select id="aptCategory" class="form-input" required>
+                            <option value="Normal">Normal</option>
+                            <option value="Regular">Regular</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <div style="grid-column: 1 / -1;">
+                    <label class="form-label">Location (Map Link)</label>
+                    <input type="text" id="aptLocation" class="form-input" placeholder="Paste address or Maps URL">
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <label class="form-label">Patient Medical History / Admin Notes</label>
+                    <textarea id="aptPatientNotes" class="form-input" rows="2" placeholder="Pre-existing conditions, allergies, or patient background..."></textarea>
+                </div>
+            </div>
+
+            <div class="input-group three-cols">
+                <div>
+                    <label class="form-label">Branch *</label>
+                    <select id="aptBranch" class="form-input" required><option value="">Loading Branches...</option></select>
+                </div>
+                <div>
+                    <label class="form-label">Date *</label>
+                    <input type="date" id="aptDate" class="form-input" required>
+                </div>
+                <div>
+                    <label class="form-label">Time *</label>
+                    <input type="time" id="aptTime" class="form-input" required>
+                </div>
+            </div>
+
+            <div class="input-group three-cols">
+                <div>
+                    <label class="form-label">Head Doctor/Therapist *</label>
+                    <select id="aptFormTherapist" class="form-input" required><option value="">Loading Doctors...</option></select>
+                </div>
+                <div>
+                    <label class="form-label">Status *</label>
+                    <select id="aptStatus" class="form-input" onchange="window.toggleReschedule(this)" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Reported">Reported</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Rescheduled">Rescheduled</option>
+                    </select>
+                </div>
+                <div id="reschedule-container" style="display:none;">
+                    <label class="form-label" style="color: var(--danger);">Pick New Reschedule Date</label>
+                    <input type="date" id="aptRescheduleDate" class="form-input" style="border-color: var(--danger);">
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <label class="form-label">Administrative Notes</label>
+                    <textarea id="aptNotes" class="form-input" rows="2" placeholder="Record symptoms or log reschedule history here..."></textarea>
+                </div>
+            </div>
+
+            <div class="input-group" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); background: var(--bg); padding: 16px; border-radius: 12px; margin-top: 8px;">
+                <div>
+                    <label class="form-label">Total Fee (₹)</label>
+                    <input type="number" id="aptFee" class="form-input" placeholder="0.00" oninput="window.calcBalance()">
+                </div>
+                <div>
+                    <label class="form-label">Prev. Dues (OP) (₹)</label>
+                    <input type="number" id="aptPrevDues" class="form-input" placeholder="0.00" readonly style="font-weight: 700; color: var(--danger); background: transparent; border: none;">
+                </div>
+                <div>
+                    <label class="form-label">Advance Paid (₹)</label>
+                    <input type="number" id="aptAdvance" class="form-input" placeholder="0.00" oninput="window.calcBalance()">
+                </div>
+                <div>
+                    <label class="form-label">Net Balance (₹)</label>
+                    <input type="number" id="aptBalance" class="form-input" placeholder="0.00" readonly style="font-weight: 700; color: var(--danger); background: transparent; border: none;">
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-top: 24px;">
+                <button type="button" class="btn-outline" style="margin-right: 12px;" onclick="window.resetAptForm()">Clear Form</button>
+                <button type="button" class="btn-primary" id="saveAptBtn" onclick="window.saveAppointment()">Save Schedule</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="notes-modal-overlay" id="notesModal">
+        <div class="notes-modal-content">
+            <div class="notes-modal-header no-print">
+                <h3 style="margin: 0; color: var(--primary);">Patient Notes</h3>
+                <button class="btn-outline" onclick="document.getElementById('notesModal').style.display='none'" style="padding: 4px 8px; border: none;"><span class="material-symbols-rounded">close</span></button>
+            </div>
+            <div id="printNotesArea">
+                <h4 id="modalPatientName" style="margin-bottom: 4px; font-size: 18px;">---</h4>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;" id="modalPatientMeta">---</p>
+                <div style="background: #FAFAFA; border: 1px solid var(--border); padding: 16px; border-radius: 8px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; min-height: 150px;" id="modalPatientNotesText"></div>
+            </div>
+            <div class="no-print" style="margin-top: 20px; text-align: right;">
+                <button class="btn-primary" onclick="window.printModalNotes()"><span class="material-symbols-rounded">print</span> Print Notes</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="timesheet-wrapper no-print" id="timesheetCard">
+        <h4 style="margin: 0 0 12px 0; color: var(--text-main); font-size: 14px;">Today's Timesheet (<span id="ts-date-label"></span>)</h4>
+        <div id="timesheet-container">
+            </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-header">
+            <h4 style="margin:0;">Detailed Schedule Directory</h4>
+            
+            <div id="filter-container" class="no-print" style="display:flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #FAFAFA; padding: 16px; border-radius: 12px; border: 1px solid var(--border); width: 100%;">
+                
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <input type="date" id="filterDateFrom" class="form-input" onchange="window.filterTable()" style="width: auto; padding: 8px;" title="From Date">
+                    <span style="font-size: 12px; color: var(--text-muted);">to</span>
+                    <input type="date" id="filterDateTo" class="form-input" onchange="window.filterTable()" style="width: auto; padding: 8px;" title="To Date">
+                    <button class="btn-outline" onclick="window.setFilterToday()" style="padding: 8px 12px;">Today</button>
+                </div>
+                
+                <select id="filterTherapist" class="form-input" onchange="window.filterTable()" style="width: auto; padding: 8px;">
+                    <option value="">All Doctors</option>
+                </select>
+
+                <select id="filterCategory" class="form-input" onchange="window.filterTable()" style="width: auto; padding: 8px;">
+                    <option value="">All Categories</option>
+                    <option value="regular">Regular Clients</option>
+                    <option value="normal">Normal Clients</option>
+                </select>
+
+                <select id="filterStatus" class="form-input" onchange="window.filterTable()" style="width: auto; padding: 8px;">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="reported">Reported</option>
+                    <option value="completed">Completed</option>
+                    <option value="rescheduled">Rescheduled</option>
+                </select>
+                
+                <select id="filterBranch" class="form-input" onchange="window.filterTable()" style="width: auto; padding: 8px; display: none;">
+                    <option value="">All Branches</option>
+                </select>
+
+                <div style="display: flex; align-items: center; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; flex: 1; min-width: 150px;">
+                    <span class="material-symbols-rounded" style="font-size: 18px; color: var(--text-muted);">search</span>
+                    <input type="text" id="aptSearchInput" onkeyup="window.filterTable()" placeholder="Search Name, Mobile..." style="border: none; background: transparent; outline: none; font-size: 13px; width: 100%; margin-left: 8px; padding: 8px 0;">
+                </div>
+                <button class="btn-outline" onclick="window.clearFilters()" style="padding: 8px;">Clear</button>
+            </div>
+            
+            <div id="bulk-reschedule-container" class="no-print" style="background: var(--primary-light); padding: 16px; border-radius: 12px; align-items: center; gap: 12px;">
+                <strong style="color: var(--primary); font-size: 14px;">Copy selected to new date:</strong>
+                <input type="date" id="bulkDateInput" class="form-input" style="width: auto;">
+                <button class="btn-primary" onclick="window.executeBulkReschedule()">Execute Copy</button>
+                <button class="btn-outline" onclick="window.toggleSection('bulk-reschedule-container')">Cancel</button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="saas-table">
+                <thead>
+                    <tr>
+                        <th class="no-print"><input type="checkbox" onclick="window.toggleAllCheckboxes(this)"></th>
+                        <th>Date & Time</th>
+                        <th>Patient Details</th>
+                        <th>Branch / Doctor</th>
+                        <th>Financials</th>
+                        <th>Status & Notes</th>
+                        <th class="no-print" style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="aptTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAcO1L2Za7dzILxylmMkRTSx0FBVu_EEoM",
+            authDomain: "cmf001stra.firebaseapp.com",
+            projectId: "cmf001stra",
+            storageBucket: "cmf001stra.firebasestorage.app",
+            messagingSenderId: "763958641347",
+            appId: "1:763958641347:web:316876bc2340b26bd21876"
+        };
+
+        const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+        const db = getFirestore(app);
+
+        // --- GLOBAL CONTEXT ---
+        window.appointmentsDataCache = {};
+        window.allBranchesString = "";
+        
+        // Mock current user object (Replace with your actual Firebase Auth object)
+        window.currentUser = window.currentUser || { role: 'admin', branch: 'Main' };
+
+        // --- SAFE DYNAMIC LOADERS (Branches & Doctors) ---
+        window.loadBranchesForApt = async function() {
+            const branchSelect = document.getElementById('aptBranch');
+            const filterSelect = document.getElementById('filterBranch');
+            
+            if (window.currentUser && window.currentUser.role !== 'admin') {
+                const userBranch = window.currentUser.branch;
+                branchSelect.innerHTML = `<option value="${userBranch}">${userBranch}</option>`;
+                filterSelect.innerHTML = `<option value="${userBranch}">${userBranch}</option>`;
+                branchSelect.style.pointerEvents = 'none';
+                branchSelect.style.background = 'var(--grey-med)';
+                filterSelect.style.display = 'none'; 
+                window.allBranchesString = userBranch;
+                return; 
+            }
+
+            filterSelect.style.display = 'block'; 
+            try {
+                const snap = await getDocs(collection(db, "branches"));
+                let branchList = [];
+                snap.forEach(doc => {
+                    const bName = doc.data().name;
+                    if(bName) branchList.push(bName);
+                });
+                branchList.sort();
+                window.allBranchesString = branchList.join(" | ");
+
+                let bHtml = '<option value="">Select Branch</option>';
+                let fHtml = '<option value="">All Branches</option>';
+                branchList.forEach(bName => {
+                    bHtml += `<option value="${bName}">${bName}</option>`;
+                    fHtml += `<option value="${bName}">${bName}</option>`;
+                });
+                
+                branchSelect.innerHTML = bHtml;
+                filterSelect.innerHTML = fHtml;
+            } catch(e) { console.error("Error loading branches"); }
+        };
+
+        window.loadTherapistsForApt = async function() {
+            const therapistSelect = document.getElementById('aptFormTherapist');
+            try {
+                const snap = await getDocs(collection(db, "therapists"));
+                let thList = [];
+                snap.forEach(doc => { 
+                    const tName = doc.data().name;
+                    if(tName) thList.push(tName); 
+                });
+                thList.sort();
+
+                let html = '<option value="">Select Doctor/Therapist</option>';
+                thList.forEach(tName => html += `<option value="${tName}">Dr. ${tName}</option>`);
+                therapistSelect.innerHTML = html;
+            } catch(e) { console.error("Error loading therapists"); }
+        };
+
+        // --- UTILS & UI TOGGLES ---
+        window.toggleSection = function(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('active');
+        }
+
+        window.toggleReschedule = function(select) {
+            const container = document.getElementById('reschedule-container');
+            if (select.value === 'Rescheduled') container.style.display = 'block';
+            else {
+                container.style.display = 'none';
+                document.getElementById('aptRescheduleDate').value = '';
+            }
+        }
+
+        window.toggleTimesheet = function() {
+            window.toggleSection('timesheetCard');
+            const card = document.getElementById('timesheetCard');
+            if(card.classList.contains('active')) window.setFilterToday();
+        }
+
+        window.formatIndianDate = function(dateStr) {
+            if(!dateStr) return '';
+            const p = dateStr.split('-');
+            if(p.length !== 3) return dateStr;
+            return `${p[2]}/${p[1]}/${p[0]}`;
+        }
+
+        window.setFilterToday = function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById("filterDateFrom").value = today;
+            document.getElementById("filterDateTo").value = today;
+            document.getElementById("ts-date-label").innerText = window.formatIndianDate(today);
+            window.filterTable();
+        }
+
+        // --- FETCHING DATA ---
+        window.loadAppointments = async function() {
+            const tableBody = document.getElementById('aptTableBody');
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px;">Loading data...</td></tr>';
+            try {
+                let q;
+                if (window.currentUser && window.currentUser.role !== 'admin') {
+                    q = query(collection(db, "appointments"), where("branch", "==", window.currentUser.branch));
+                } else {
+                    q = query(collection(db, "appointments"));
+                }
+
+                const querySnapshot = await getDocs(q);
+                let aptsList = [];
+                querySnapshot.forEach(docSnap => aptsList.push({ id: docSnap.id, data: docSnap.data() }));
+
+                aptsList.sort((a, b) => new Date(b.data.date || 0) - new Date(a.data.date || 0));
+                const groupedApts = {};
+                aptsList.forEach(item => {
+                    const th = item.data.therapist || 'Unassigned';
+                    if (!groupedApts[th]) groupedApts[th] = [];
+                    groupedApts[th].push(item);
+                });
+
+                tableBody.innerHTML = '';
+                window.appointmentsDataCache = {}; 
+                const today = new Date().toISOString().split('T')[0];
+                let todayApts = [];
+                
+                let doctorFilterHtml = '<option value="">All Doctors</option>';
+                Object.keys(groupedApts).sort().forEach(doc => {
+                    doctorFilterHtml += `<option value="${doc.toLowerCase()}">Dr. ${doc}</option>`;
+                });
+                document.getElementById('filterTherapist').innerHTML = doctorFilterHtml;
+
+                Object.keys(groupedApts).sort().forEach(therapist => {
+                    const thRow = document.createElement('tr');
+                    thRow.className = "therapist-group-header";
+                    thRow.setAttribute("data-therapist-group", therapist.toLowerCase());
+                    thRow.innerHTML = `<td colspan="7" style="background: var(--primary-light); padding: 12px 20px;"><strong style="color: var(--primary);">Dr. ${therapist}</strong></td>`;
+                    tableBody.appendChild(thRow);
+
+                    groupedApts[therapist].forEach((item) => {
+                        const data = item.data;
+                        const docId = item.id; 
+                        window.appointmentsDataCache[docId] = data;
+                        
+                        if(data.date === today) todayApts.push(data);
+
+                        let statusBadge = '';
+                        if(data.status === 'Completed') statusBadge = '<span class="badge badge-completed">Completed</span>';
+                        else if(data.status === 'Reported') statusBadge = '<span class="badge badge-reported">Reported</span>';
+                        else if(data.status === 'Rescheduled') statusBadge = `<span class="badge badge-rescheduled">Rescheduled</span>`;
+                        else statusBadge = '<span class="badge badge-pending">Pending</span>';
+
+                        const indDate = window.formatIndianDate(data.date);
+                        let noteSnippet = data.notes ? `<div style="margin-top: 6px; font-size: 11px; color: var(--secondary); background: #FAFAFA; padding: 4px; border-radius: 4px; line-height: 1.4;">${data.notes}</div>` : '';
+                        
+                        const waText = encodeURIComponent(`Hello ${data.name}, your appointment at STRA CARE (${data.branch}) is booked for ${indDate}.`);
+                        let locLink = data.location ? `<a href="${data.location.startsWith('http') ? data.location : 'http://googleusercontent.com/maps.google.com/?q=' + encodeURIComponent(data.location)}" class="cta-link" target="_blank" title="View Map"><span class="material-symbols-rounded" style="font-size: 16px; color: #3B82F6;">map</span></a>` : '';
+
+                        const prevDuesSafe = data.prevDues || 0;
+                        const patientCategory = data.category || 'Normal';
+                        const categoryBadge = patientCategory === 'Regular' ? `<span class="badge badge-regular"><span class="material-symbols-rounded" style="font-size: 10px; vertical-align: middle;">star</span> Regular</span>` : '';
+
+                        const tr = document.createElement('tr');
+                        tr.className = "apt-row"; 
+                        tr.setAttribute("data-status", (data.status || '').toLowerCase());
+                        tr.setAttribute("data-date", data.date || '');
+                        tr.setAttribute("data-balance", data.balance || 0);
+                        tr.setAttribute("data-therapist", (data.therapist || '').toLowerCase());
+                        tr.setAttribute("data-branch", (data.branch || '').toLowerCase());
+                        tr.setAttribute("data-category", patientCategory.toLowerCase());
+                        tr.setAttribute("data-search", `${data.name || ''} ${data.mobile || ''}`.toLowerCase());
+
+                        tr.innerHTML = `
+                            <td class="no-print"><input type="checkbox" class="apt-checkbox" value="${docId}"></td>
+                            <td><strong>${indDate}</strong><br><span style="font-size:12px; color:var(--text-muted);">${data.time}</span></td>
+                            <td>
+                                <strong>${data.name}</strong> <span style="font-size:11px; color:var(--text-muted);">(${data.age || '--'} Yrs)</span> ${categoryBadge}<br>
+                                <span style="font-size: 12px; color: var(--text-muted);">${data.mobile}</span>
+                                <div class="no-print" style="display: flex; gap: 8px; margin-top: 6px;">
+                                    <a href="tel:${data.mobile}" class="cta-link" title="Call"><span class="material-symbols-rounded" style="font-size: 16px; color: var(--secondary);">call</span></a>
+                                    <a href="https://wa.me/91${data.mobile}?text=${waText}" class="cta-link" target="_blank" title="WhatsApp"><span class="material-symbols-rounded" style="font-size: 16px; color: var(--success);">chat</span></a>
+                                    ${locLink}
+                                </div>
+                            </td>
+                            <td><strong>${data.branch}</strong><br><span style="font-size:12px; color:var(--text-muted);">${data.therapist}</span></td>
+                            <td>Fee: ₹${data.fee || 0}<br><strong style="color: var(--danger); font-size: 12px;">Bal: ₹${data.balance || 0}</strong></td>
+                            <td>${statusBadge} ${noteSnippet}</td>
+                            <td class="no-print" style="text-align: right;">
+                                <div style="display:flex; gap: 10px; align-items:center; justify-content: flex-end;">
+                                    <span class="material-symbols-rounded" style="color: #8B5CF6; cursor: pointer; font-size: 20px;" title="View Notes" onclick="window.viewNotes('${docId}')">sticky_note_2</span>
+                                    <span class="material-symbols-rounded" style="color: var(--primary); cursor: pointer; font-size: 20px;" title="Print Invoice" onclick="window.printInvoice('${data.name}', '${data.mobile}', '${indDate}', '${data.branch}', '${data.fee}', '${data.advance}', '${data.balance}', '${prevDuesSafe}')">receipt_long</span>
+                                    <span class="material-symbols-rounded" style="color: var(--text-muted); cursor: pointer; font-size: 20px;" title="Edit" onclick="window.editAppointment('${docId}')">edit</span>
+                                </div>
+                            </td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                });
+
+                window.renderTimesheet(todayApts, Object.keys(groupedApts).sort());
+                window.setFilterToday();
+            } catch (error) { console.error(error); }
+        };
+
+        // --- TIMESHEET GENERATOR ---
+        window.renderTimesheet = function(todayApts, doctors) {
+            let html = '<table class="timesheet-table"><thead><tr><th>Doctor</th>';
+            for(let i=7; i<=19; i++) { html += `<th>${i > 12 ? i-12 : i}${i >= 12 ? 'PM' : 'AM'}</th>`; }
+            html += '</tr></thead><tbody>';
+
+            doctors.forEach(doc => {
+                html += `<tr><td class="ts-doctor">Dr. ${doc}</td>`;
+                for(let h=7; h<=19; h++) {
+                    html += `<td>`;
+                    const hourApts = todayApts.filter(a => a.therapist === doc && a.time && parseInt(a.time.split(':')[0]) === h);
+                    hourApts.forEach(a => { html += `<div class="ts-booking" title="${a.name} - ${a.time}">${a.name}</div>`; });
+                    html += `</td>`;
+                }
+                html += `</tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('timesheet-container').innerHTML = html;
+        }
+
+        // --- ADVANCED FILTERING ---
+        window.filterTable = function() {
+            const sStatus = document.getElementById("filterStatus").value.toLowerCase();
+            const sFrom = document.getElementById("filterDateFrom").value;
+            const sTo = document.getElementById("filterDateTo").value;
+            const sText = document.getElementById("aptSearchInput").value.toLowerCase();
+            const sTherapist = document.getElementById("filterTherapist").value.toLowerCase();
+            const sCategory = document.getElementById("filterCategory").value.toLowerCase();
+            const sBranch = document.getElementById("filterBranch") ? document.getElementById("filterBranch").value.toLowerCase() : "";
+            
+            const trs = document.getElementById("aptTableBody").getElementsByTagName("tr");
+            let currentTherapistHeader = null;
+            let visibleInGroup = 0;
+
+            for (let i = 0; i < trs.length; i++) {
+                if (trs[i].classList.contains('therapist-group-header')) {
+                    if (currentTherapistHeader && visibleInGroup === 0) currentTherapistHeader.style.display = "none";
+                    currentTherapistHeader = trs[i];
+                    visibleInGroup = 0;
+                    
+                    const hTherapist = trs[i].getAttribute("data-therapist-group");
+                    if (sTherapist && hTherapist !== sTherapist) currentTherapistHeader.style.display = "none";
+                    else currentTherapistHeader.style.display = ""; 
+                    continue;
+                }
+
+                if (trs[i].cells.length === 1) continue;
+
+                const st = trs[i].getAttribute("data-status");
+                const dt = trs[i].getAttribute("data-date");
+                const bal = parseFloat(trs[i].getAttribute("data-balance"));
+                const txt = trs[i].getAttribute("data-search");
+                const therapistName = trs[i].getAttribute("data-therapist");
+                const cat = trs[i].getAttribute("data-category");
+                const rowBranch = trs[i].getAttribute("data-branch");
+
+                let show = true;
+                if (sFrom && dt < sFrom) show = false;
+                if (sTo && dt > sTo) show = false;
+                if (sStatus && st !== sStatus) show = false;
+                if (sTherapist && therapistName !== sTherapist) show = false;
+                if (sCategory && cat !== sCategory) show = false;
+                if (sBranch && rowBranch !== sBranch) show = false;
+                if (sText && txt.indexOf(sText) === -1) show = false;
+
+                if (st === 'completed' && bal <= 0 && sStatus === "" && !sText) show = false; 
+
+                if(show) { trs[i].style.display = ""; visibleInGroup++; } 
+                else { trs[i].style.display = "none"; }
+            }
+            if (currentTherapistHeader && visibleInGroup === 0) currentTherapistHeader.style.display = "none";
+        }
+
+        window.clearFilters = function() {
+            document.getElementById("filterStatus").value = "";
+            document.getElementById("aptSearchInput").value = "";
+            document.getElementById("filterTherapist").value = "";
+            document.getElementById("filterCategory").value = "";
+            if(document.getElementById("filterBranch")) document.getElementById("filterBranch").value = "";
+            window.setFilterToday();
+        }
+
+        // --- BULK COPY AND BULK DELETE ---
+        window.toggleAllCheckboxes = function(masterCheckbox) {
+            const checkboxes = document.querySelectorAll('.apt-checkbox');
+            checkboxes.forEach(cb => {
+                if(cb.closest('tr').style.display !== 'none') cb.checked = masterCheckbox.checked;
+            });
+        }
+
+        window.openBulkReschedule = function() {
+            const checked = document.querySelectorAll('.apt-checkbox:checked');
+            if (checked.length === 0) return alert("Please select at least one appointment to move.");
+            document.getElementById('bulk-reschedule-container').classList.add('active');
+        }
+
+        window.executeBulkReschedule = async function() {
+            const newDate = document.getElementById('bulkDateInput').value;
+            if (!newDate) return alert("Please pick a new date.");
+
+            const checkboxes = document.querySelectorAll('.apt-checkbox:checked');
+            try {
+                for (let cb of checkboxes) {
+                    const existingData = window.appointmentsDataCache[cb.value];
+                    if(!existingData) continue;
+                    const newAppointment = { ...existingData, date: newDate, status: "Pending", createdAt: new Date() };
+                    await addDoc(collection(db, "appointments"), newAppointment);
+                }
+                alert(`Successfully copied ${checkboxes.length} appointments to ${window.formatIndianDate(newDate)}!`);
+                document.getElementById('bulk-reschedule-container').classList.remove('active');
+                window.loadAppointments(); 
+            } catch(e) { alert("Failed to perform bulk copy."); }
+        }
+
+        window.executeBulkDelete = async function() {
+            if (window.currentUser && window.currentUser.role !== 'admin') {
+                return alert("Only Administrators can perform bulk deletions.");
+            }
+
+            const checkboxes = document.querySelectorAll('.apt-checkbox:checked');
+            if (checkboxes.length === 0) return alert("Please select at least one appointment to delete.");
+            
+            if(!confirm("Are you sure you want to delete the selected uncompleted appointments? This cannot be undone.")) return;
+
+            let deletedCount = 0;
+            let skippedCount = 0;
+
+            try {
+                for (let cb of checkboxes) {
+                    const existingData = window.appointmentsDataCache[cb.value];
+                    if(!existingData) continue;
+                    if(existingData.status === 'Completed') { skippedCount++; continue; }
+                    
+                    await deleteDoc(doc(db, "appointments", cb.value));
+                    deletedCount++;
+                }
+                
+                let msg = `Successfully deleted ${deletedCount} appointments.`;
+                if(skippedCount > 0) msg += `\n(${skippedCount} completed tasks were skipped).`;
+                alert(msg);
+                
+                window.loadAppointments(); 
+            } catch(e) { alert("Failed to perform bulk delete."); }
+        }
+
+        // --- INVOICE PRINTING LOGIC ---
+        window.printInvoice = function(name, mobile, indDate, branch, fee, advance, balance, prevDues) {
+            fee = parseFloat(fee) || 0; advance = parseFloat(advance) || 0;
+            balance = parseFloat(balance) || 0; prevDues = parseFloat(prevDues) || 0;
+            const netBalance = fee + prevDues - advance;
+
+            const invoiceWindow = window.open('', '_blank');
+            invoiceWindow.document.write(`
+                <html>
+                <head>
+                    <title>Invoice - ${name}</title>
+                    <style>
+                        body { font-family: 'Helvetica Neue', sans-serif; padding: 40px; color: #0a0a0a; margin: 0; background: #fff; }
+                        .header-row { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0062FF; padding-bottom: 24px; margin-bottom: 30px; }
+                        .company-info { text-align: right; font-size: 13px; color: #555; line-height: 1.6; }
+                        .bill-to { display: flex; justify-content: space-between; margin-bottom: 40px; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                        th { background: #FAFAFA; color: #777; font-size: 12px; text-transform: uppercase; padding: 12px; text-align: left; border-bottom: 2px solid #E8E5E1; }
+                        td { padding: 16px 12px; font-size: 15px; border-bottom: 1px solid #E8E5E1; }
+                        .totals-box { float: right; width: 300px; }
+                        .totals-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 15px; }
+                        .totals-row.balance { font-size: 20px; font-weight: 800; color: #0062FF; border-top: 2px solid #0a0a0a; padding-top: 15px; margin-top: 5px; }
+                        .bank-details { clear: both; margin-top: 60px; padding: 20px; background: #FAFAFA; border-radius: 8px; font-size: 13px; border: 1px solid #E8E5E1; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header-row">
+                        <div>
+                            <h1 style="color: #0062FF; margin:0 0 8px 0;">STRA CARE</h1>
+                            <div style="font-size: 13px; color: #555;">
+                                <strong>Clinic Address:</strong><br>
+                                Stra Care Headquarters<br>
+                                Building No: 123, Healthcare Avenue<br>
+                                Near Main Road, Kerala, India - 670672<br>
+                                Registration No: 12345ABCD
+                            </div>
+                        </div>
+                        <div class="company-info">
+                            <strong>+91 97449 02555 | +91 90612 07871</strong><br>
+                            info@stracares.in | www.stracares.in<br><br>
+                            <strong>Serving Branch:</strong> <span style="color: #0062FF; font-weight: 700;">${branch.toUpperCase()}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bill-to">
+                        <div>
+                            <h3 style="color:#0062FF;margin:0 0 8px 0; text-transform:uppercase; font-size:12px;">Billed To:</h3>
+                            <div style="font-size:18px;font-weight:700;">${name}</div>
+                            <div style="color: #555;">Mobile: +91 ${mobile}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="margin-bottom: 4px;"><strong>Invoice Date:</strong> ${indDate}</div>
+                            <div style="color: #555;"><strong>Service Type:</strong> Clinical Consultation / Therapy</div>
+                        </div>
+                    </div>
+                    
+                    <table>
+                        <tr><th>Description</th><th style="text-align:right;">Amount (₹)</th></tr>
+                        <tr><td>Visit / Consultation Fee</td><td style="text-align:right;">${fee.toFixed(2)}</td></tr>
+                        <tr><td>Previous Dues (OP Balance)</td><td style="text-align:right;">${prevDues.toFixed(2)}</td></tr>
+                    </table>
+                    
+                    <div class="totals-box">
+                        <div class="totals-row"><span>Sub Total:</span> <span>₹${(fee + prevDues).toFixed(2)}</span></div>
+                        <div class="totals-row"><span>Advance Paid:</span> <span style="color: #10B981;">- ₹${advance.toFixed(2)}</span></div>
+                        <div class="totals-row balance"><span>Net Balance Due:</span> <span>₹${netBalance.toFixed(2)}</span></div>
+                    </div>
+                    
+                    <div class="bank-details">
+                        <h4 style="margin: 0 0 8px 0; color: #0062FF;">Bank Details for Payment Remittance</h4>
+                        <strong>Account Name:</strong> STRA CARE | <strong>Account No:</strong> 50200120597389<br>
+                        <strong>IFSC Code:</strong> HDFC0000465 | <strong>Bank:</strong> HDFC Bank<br>
+                        <strong>UPI ID:</strong> 9744902555@hdfc
+                    </div>
+                    
+                    <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #999; text-transform: uppercase;">
+                        This is a computer generated invoice and does not require a physical signature.
+                    </div>
+                    <script>window.onload = function() { window.print(); }<\/script>
+                </body>
+                </html>
+            `);
+            invoiceWindow.document.close();
+        }
+
+        // Modal Notes
+        window.viewNotes = function(docId) {
+            const data = window.appointmentsDataCache[docId];
+            if(!data) return;
+            document.getElementById('modalPatientName').innerText = data.name;
+            document.getElementById('modalPatientMeta').innerText = `Mobile: +91 ${data.mobile} | Scheduled: ${window.formatIndianDate(data.date)}`;
+            
+            let fullNotes = "";
+            if(data.patientNotes) fullNotes += `[Medical History]\n${data.patientNotes}\n\n`;
+            if(data.notes) fullNotes += `[Admin Remarks]\n${data.notes}`;
+            
+            document.getElementById('modalPatientNotesText').innerText = fullNotes || "No notes recorded for this patient.";
+            document.getElementById('notesModal').style.display = 'flex';
+        };
+
+        window.printModalNotes = function() {
+            const content = document.getElementById('printNotesArea').innerHTML;
+            const win = window.open('', '_blank');
+            win.document.write(`<html><head><title>Patient Notes</title><style>body{font-family:sans-serif; padding:40px; line-height:1.6; color:#111;}</style></head><body><h2 style="color:var(--primary); border-bottom:2px solid var(--primary); padding-bottom:10px; text-transform:uppercase;">STRA CARE - Medical Record</h2>${content}<script>window.onload=function(){window.print();}<\/script></body></html>`);
+            win.document.close();
+        };
+
+        // Form Submit
+        window.calcBalance = function() {
+            const fee = parseFloat(document.getElementById('aptFee').value) || 0;
+            const adv = parseFloat(document.getElementById('aptAdvance').value) || 0;
+            const prev = parseFloat(document.getElementById('aptPrevDues').value) || 0;
+            document.getElementById('aptBalance').value = (fee + prev - adv).toFixed(2);
+        }
+
+        window.resetAptForm = function() {
+            document.getElementById('add-appointment-form').reset();
+            document.getElementById('aptDocId').value = ''; 
+            document.getElementById('saveAptBtn').innerText = "Save Appointment";
+            document.getElementById('aptCategory').value = "Normal";
+            
+            // Set min date to today to prevent past dates from being picked in the UI
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('aptDate').setAttribute('min', today);
+            document.getElementById('aptRescheduleDate').setAttribute('min', today);
+        }
+
+        function isPastDateTime(dateStr, timeStr) {
+            if(!dateStr) return false;
+            const target = new Date(dateStr + 'T' + (timeStr || '00:00'));
+            const now = new Date();
+            return target < now;
+        }
+
+        // --- VERIFY & AUTO-ADD NEW PATIENT LOGIC ---
+        window.verifyPatientMobile = async function() {
+            const mobile = document.getElementById('aptMobile').value;
+            const btn = document.getElementById('verifyAptBtn');
+
+            if (mobile.length !== 10) return alert("Enter a valid 10-digit mobile number first.");
+            btn.innerText = "Checking...";
+            
+            try {
+                // Fetch Patient Data
+                const pSnap = await getDocs(query(collection(db, "patients"), where("mobile", "==", mobile)));
+                if (!pSnap.empty) {
+                    const pData = pSnap.docs[0].data();
+                    document.getElementById('aptName').value = pData.name || '';
+                    document.getElementById('aptAge').value = pData.age || '';
+                    document.getElementById('aptCategory').value = pData.category || 'Normal';
+                    document.getElementById('aptLocation').value = pData.location || '';
+                    document.getElementById('aptPatientNotes').value = pData.notes || '';
+                    alert("Existing Patient Found! Details have been auto-filled.");
+                } else {
+                    // Reset fields for a new patient
+                    document.getElementById('aptName').value = '';
+                    document.getElementById('aptAge').value = '';
+                    document.getElementById('aptCategory').value = 'Normal';
+                    document.getElementById('aptLocation').value = '';
+                    document.getElementById('aptPatientNotes').value = '';
+                    alert("Patient Not Found. Please fill in the patient details. They will be added as a New Patient automatically when you save the appointment.");
+                }
+
+                // Calculate OP Balance
+                let opBalance = 0;
+                const currentDocId = document.getElementById('aptDocId').value;
+                const aptsSnap = await getDocs(query(collection(db, "appointments"), where("mobile", "==", mobile)));
+                
+                aptsSnap.forEach(doc => {
+                    if (doc.id !== currentDocId) {
+                        opBalance += parseFloat(doc.data().balance) || 0;
+                    }
+                });
+                
+                document.getElementById('aptPrevDues').value = opBalance.toFixed(2);
+                window.calcBalance();
+
+            } catch(e) { console.error("Error verifying patient:", e); }
+            btn.innerText = "Check";
+        }
+
+        window.saveAppointment = async function() {
+            const payload = {
+                mobile: document.getElementById('aptMobile').value,
+                name: document.getElementById('aptName').value,
+                age: document.getElementById('aptAge').value,
+                category: document.getElementById('aptCategory').value,
+                date: document.getElementById('aptDate').value,
+                time: document.getElementById('aptTime').value,
+                therapist: document.getElementById('aptFormTherapist').value,
+                status: document.getElementById('aptStatus').value,
+                branch: document.getElementById('aptBranch').value,
+                fee: parseFloat(document.getElementById('aptFee').value) || 0,
+                advance: parseFloat(document.getElementById('aptAdvance').value) || 0,
+                balance: parseFloat(document.getElementById('aptBalance').value) || 0,
+                notes: document.getElementById('aptNotes').value,
+                patientNotes: document.getElementById('aptPatientNotes').value,
+                location: document.getElementById('aptLocation').value
+            };
+            
+            if(!payload.name || !payload.mobile || !payload.date || !payload.time) {
+                return alert("Please fill in all required (*) fields.");
+            }
+
+            const docId = document.getElementById('aptDocId').value;
+
+            // Validate Past Bookings
+            if(!docId && isPastDateTime(payload.date, payload.time)) {
+                return alert("Booking Error: You cannot schedule an appointment for a date or time that has already passed.");
+            }
+
+            const rescheduleDate = document.getElementById('aptRescheduleDate').value;
+            if(payload.status === 'Rescheduled' && isPastDateTime(rescheduleDate, payload.time)) {
+                return alert("Reschedule Error: You cannot move the appointment to a past date.");
+            }
+
+            if (payload.status === 'Rescheduled') {
+                if(!rescheduleDate) return alert("Please pick a new reschedule date.");
+                payload.date = rescheduleDate; 
+                let cleanNotes = payload.notes.replace(/\[Moved from: .*?\]/g, '').trim();
+                payload.notes = (cleanNotes ? cleanNotes + '\n' : '') + `[Moved from: ${window.formatIndianDate(document.getElementById('aptDate').value)}]`; 
+            }
+            
+            try {
+                // Auto-Add New Patient if Mobile doesn't exist
+                const pSnap = await getDocs(query(collection(db, "patients"), where("mobile", "==", payload.mobile)));
+                if (pSnap.empty) {
+                    await addDoc(collection(db, "patients"), { 
+                        mobile: payload.mobile, 
+                        name: payload.name, 
+                        age: payload.age,
+                        category: payload.category,
+                        location: payload.location,
+                        notes: payload.patientNotes,
+                        branch: payload.branch, 
+                        createdAt: new Date() 
+                    });
+                }
+                
+                if(docId) {
+                    payload.updatedAt = new Date();
+                    await updateDoc(doc(db, "appointments", docId), payload);
+                } else {
+                    payload.createdAt = new Date();
+                    await addDoc(collection(db, "appointments"), payload);
+                }
+                
+                alert("Appointment Saved Successfully!");
+                window.resetAptForm();
+                document.getElementById('aptFormCard').classList.remove('active');
+                window.loadAppointments();
+            } catch(e) { console.error(e); }
+        }
+
+        window.editAppointment = function(docId) {
+            const data = window.appointmentsDataCache[docId];
+            if(!data) return;
+            document.getElementById('aptDocId').value = docId; 
+            document.getElementById('aptMobile').value = data.mobile || '';
+            document.getElementById('aptName').value = data.name || '';
+            document.getElementById('aptAge').value = data.age || '';
+            document.getElementById('aptCategory').value = data.category || 'Normal';
+            document.getElementById('aptDate').value = data.date || '';
+            document.getElementById('aptTime').value = data.time || '';
+            document.getElementById('aptFormTherapist').value = data.therapist || '';
+            document.getElementById('aptStatus').value = data.status || 'Pending';
+            document.getElementById('aptNotes').value = data.notes || '';
+            document.getElementById('aptPatientNotes').value = data.patientNotes || '';
+            document.getElementById('aptLocation').value = data.location || '';
+            document.getElementById('aptFee').value = data.fee || '';
+            document.getElementById('aptAdvance').value = data.advance || '';
+            
+            window.calcBalance();
+            window.toggleReschedule(document.getElementById('aptStatus'));
+            document.getElementById('saveAptBtn').innerText = "Update Appointment";
+            document.getElementById('aptFormCard').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.onload = () => {
+            window.resetAptForm();
+            window.loadBranchesForApt();
+            window.loadTherapistsForApt();
+            window.loadAppointments();
+        }
+    </script>
+</div>
+</body>
+</html>
