@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CMB | Attendance</title>
+    <title>Stra Cares - Daily Attendance</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"/>
 </head>
@@ -11,19 +11,38 @@
 
 <div class="module-container" id="attendance-module">
     <style>
-        :root { --primary: #0052cc; --primary-light: #fef5e8; --bg: #F8F5F1; --surface: #ffffff; --text-main: #0a0a0a; --text-muted: #777777; --border: #E8E5E1; --grey-med: #D9D9D9; --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.03); --success: #10B981; --danger: #ef4444; --warning: #FB923C; }
+        :root { 
+            /* Zoho Blue Theme */
+            --primary: #0062FF; 
+            --primary-light: #eaf1ff; 
+            --bg: #F8F9FA; 
+            --surface: #ffffff; 
+            --text-main: #0a0a0a; 
+            --text-muted: #6b7280; 
+            --border: #e5e7eb; 
+            --grey-med: #D9D9D9; 
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05); 
+            --success: #10B981; 
+            --danger: #EF4444; 
+            --warning: #F59E0B; 
+        }
         
-        #attendance-module { font-family: 'Inter', sans-serif; width: 100%; max-width: 1120px; }
-        #attendance-module .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;}
+        #attendance-module { font-family: 'Inter', sans-serif; width: 100%; max-width: 1120px; margin: 0 auto; padding: 16px;}
+        #attendance-module .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;}
         
-        #attendance-module .form-card { background: var(--surface); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 24px; position: relative; }
+        /* Action Bar */
+        .action-bar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+        .action-bar .btn-action { background: var(--surface); color: var(--primary); border: 1px solid var(--primary); padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .action-bar .btn-action:hover { background: var(--primary); color: white; }
+
+        #attendance-module .form-card { background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 24px; position: relative; animation: fadeIn 0.3s ease;}
         #attendance-module .form-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
         
         #attendance-module .input-group { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; }
         @media (min-width: 768px) { #attendance-module .input-group { grid-template-columns: 1fr 1fr; } }
         @media (min-width: 1024px) { #attendance-module .input-group.three-cols { grid-template-columns: 1fr 1fr 1fr; } }
 
-        #attendance-module .form-input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); font-size: 14px; color: var(--text-main); background: #FAFAFA; outline: none; transition: border 0.2s; appearance: auto; }
+        #attendance-module .form-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px; color: var(--text-main); background: #FAFAFA; outline: none; transition: border 0.2s; appearance: auto; box-sizing: border-box;}
         #attendance-module .form-input:focus { border-color: var(--primary); background: var(--surface); }
 
         #attendance-module .btn-primary { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 6px;}
@@ -32,7 +51,7 @@
         #attendance-module .btn-outline { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 
         /* Google Sheet Style Horizontal Scroll Table */
-        #attendance-module .table-container { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
+        #attendance-module .table-container { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
         #attendance-module .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 16px; }
         #attendance-module .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         #attendance-module .saas-table { width: 100%; min-width: 800px; border-collapse: collapse; text-align: left; }
@@ -42,16 +61,16 @@
         /* Status Badges */
         .badge { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; display: inline-block; }
         .badge-present { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .badge-absent { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
-        .badge-leave { background: rgba(251, 146, 60, 0.1); color: var(--warning); }
+        .badge-halfday { background: rgba(0, 98, 255, 0.1); color: var(--primary); }
 
-        /* Summary Dashboard */
-        .summary-dashboard { display: flex; gap: 12px; flex-wrap: wrap; background: #FAFAFA; padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
-        .summary-card { flex: 1; min-width: 120px; padding: 12px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .summary-card span { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
-        .summary-card strong { font-size: 20px; font-weight: 800; color: var(--text-main); }
+        /* Summary Dashboard (Branch-Wise) */
+        .summary-dashboard { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; animation: fadeIn 0.3s ease;}
+        .summary-card { flex: 1; min-width: 130px; padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .summary-card span { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;}
+        .summary-card strong { font-size: 24px; font-weight: 800; color: var(--text-main); }
         .summary-card.present strong { color: var(--success); }
-        .summary-card.absent strong { color: var(--danger); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Monthly View Matrix Styling */
         #monthTable { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 1100px; }
@@ -59,19 +78,16 @@
         #monthTable td { border: 1px solid var(--border); padding: 6px 4px; text-align: center; font-weight: 600; }
         #monthTable td:nth-child(1), #monthTable td:nth-child(2), #monthTable td:nth-child(3) { text-align: left; padding-left: 10px; }
         .m-st-P { color: var(--success); }
-        .m-st-A { color: var(--danger); }
-        .m-st-L { color: var(--warning); }
         .m-st-H { color: #3B82F6; }
         .m-st-none { color: #ddd; font-weight: normal; }
 
         @media print {
             @page { size: A4 landscape; margin: 10mm; }
             body { background: white; padding: 0; }
-            #sidebar-container, #header-container, #bottomnav-container, .no-print { display: none !important; }
+            #sidebar-container, #header-container, #bottomnav-container, .no-print, .action-bar, .summary-dashboard { display: none !important; }
             .main-wrapper { flex: 1; display: block; overflow: visible; }
             #main-content { padding: 0; overflow: visible; }
             
-            /* Logic for printing Monthly Matrix vs Daily Log */
             body.printing-monthly #daily-entry-form, 
             body.printing-monthly #daily-log-container { display: none !important; }
             
@@ -88,34 +104,41 @@
 
     <div class="section-title">
         <h2 style="margin: 0;">Attendance Management</h2>
-        <button class="btn-outline no-print" onclick="window.openMonthlyReport()" style="border-color: var(--primary); color: var(--primary);">
+    </div>
+
+    <div class="action-bar no-print">
+        <button class="btn-action" onclick="window.toggleSection('daily-entry-form')">
+            <span class="material-symbols-rounded">add_circle</span> Add Attendance Today
+        </button>
+        <button class="btn-outline no-print" onclick="window.openMonthlyReport()" style="margin-left: auto; border-color: var(--primary); color: var(--primary);">
             <span class="material-symbols-rounded" style="font-size: 18px;">calendar_month</span> View Monthly Matrix
         </button>
     </div>
 
-    <!-- MONTHLY REPORT CONTAINER -->
+    <div class="summary-dashboard no-print" id="summaryDashboard">
+        </div>
+
     <div class="table-container" id="monthlyReportContainer" style="display: none;">
         <div class="table-header no-print" style="flex-direction: row; flex-wrap: wrap;">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                 <h4 style="margin: 0;">Monthly Attendance Report</h4>
                 <div style="display: flex; gap: 8px;">
-                    <!-- Monthly CSV Export Button -->
                     <button class="btn-outline no-print" onclick="window.exportMonthlyCSV()" style="padding: 6px 12px; font-size: 12px; color: var(--success); border-color: rgba(16, 185, 129, 0.5);">
                         <span class="material-symbols-rounded" style="font-size: 14px;">description</span> Export CSV
                     </button>
                     <button class="btn-primary no-print" onclick="window.printMonthlyReport()" style="padding: 6px 12px; font-size: 12px;">
-                        <span class="material-symbols-rounded" style="font-size: 14px;">print</span> Print A4 Report
+                        <span class="material-symbols-rounded" style="font-size: 14px;">print</span> Print Matrix
                     </button>
                     <button class="btn-outline no-print" onclick="document.getElementById('monthlyReportContainer').style.display='none'" style="padding: 6px 12px; font-size: 12px;">Close</button>
                 </div>
             </div>
             
-            <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #FAFAFA; padding: 12px; border-radius: 8px; border: 1px solid var(--border); width: 100%;">
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #FAFAFA; padding: 12px; border-radius: 10px; border: 1px solid var(--border); width: 100%;">
                 <input type="month" id="reportMonth" class="form-input" style="padding: 8px; font-size: 12px; width: auto;" title="Select Month">
                 <select id="reportBranch" class="form-input" style="padding: 8px; font-size: 12px; width: auto;">
                     <option value="">All Branches</option>
                 </select>
-                <button class="btn-outline" onclick="window.generateMonthlyReport()" style="padding: 8px 16px; font-size: 12px; background: var(--primary); color: white; border: none;">Generate Report</button>
+                <button class="btn-primary" onclick="window.generateMonthlyReport()" style="padding: 8px 16px; font-size: 12px;">Generate Report</button>
             </div>
         </div>
 
@@ -132,8 +155,11 @@
         </div>
     </div>
 
-    <!-- DAILY ENTRY FORM -->
-    <div class="form-card no-print" id="daily-entry-form">
+    <div class="form-card no-print" id="daily-entry-form" style="display: none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+            <h4 style="color: var(--primary); margin: 0;">Mark Present Employees</h4>
+            <button class="btn-outline" onclick="window.toggleSection('daily-entry-form')" style="border:none; padding:4px;"><span class="material-symbols-rounded">close</span></button>
+        </div>
         <form id="attendance-form" onsubmit="event.preventDefault();">
             <input type="hidden" id="attDocId" value="">
 
@@ -160,33 +186,30 @@
                 <div>
                     <label class="form-label">Attendance Status *</label>
                     <select id="attStatus" class="form-input" required>
-                        <option value="Present">Present</option>
-                        <option value="Absent">Absent</option>
-                        <option value="Leave">On Leave</option>
-                        <option value="Half-Day">Half-Day</option>
+                        <option value="Present">Present (Full Day)</option>
+                        <option value="Half-Day">Present (Half-Day)</option>
                     </select>
                 </div>
                 <div style="grid-column: span 2;">
-                    <label class="form-label">Notes / Reason</label>
-                    <input type="text" id="attNotes" class="form-input" placeholder="Any specific remarks or reason for absence...">
+                    <label class="form-label">Notes / Shift Details</label>
+                    <input type="text" id="attNotes" class="form-input" placeholder="Any specific shift remarks...">
                 </div>
             </div>
 
             <div style="text-align: right; margin-top: 16px;">
                 <button type="button" class="btn-outline" style="margin-right: 12px; padding: 12px 24px;" onclick="window.resetAttForm()">Clear Form</button>
                 <button type="button" class="btn-primary" id="saveAttBtn" onclick="window.saveAttendance()">
-                    <span class="material-symbols-rounded" style="font-size: 18px;">how_to_reg</span> Save Attendance
+                    <span class="material-symbols-rounded" style="font-size: 18px;">how_to_reg</span> Mark Present
                 </button>
             </div>
         </form>
     </div>
 
-    <!-- DAILY ATTENDANCE LOG TABLE -->
     <div class="table-container" id="daily-log-container">
         <div class="table-header">
             
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <h4 style="margin: 0;">Daily Attendance Log</h4>
+                <h4 style="margin: 0;">Detailed Attendance Log</h4>
                 <div style="display: flex; gap: 8px;">
                     <button class="btn-outline no-print" onclick="window.exportDailyAttCSV()" style="padding: 6px 12px; font-size: 12px;">
                         <span class="material-symbols-rounded" style="font-size: 14px; color: var(--success);">description</span> CSV
@@ -197,40 +220,19 @@
                 </div>
             </div>
 
-            <div class="summary-dashboard" id="summaryDashboard">
-                <div class="summary-card">
-                    <span>Total Logs</span>
-                    <strong id="countTotal">0</strong>
+            <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #FAFAFA; padding: 12px; border-radius: 10px; border: 1px solid var(--border); width: 100%;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <input type="date" id="filterAttDate" class="form-input" onchange="window.filterAttTable()" style="padding: 8px; font-size: 12px; width: auto;" title="Filter by Exact Date">
+                    <button class="btn-outline" onclick="window.setAttFilterToday()" style="padding: 8px 12px; font-size: 12px;">Today</button>
                 </div>
-                <div class="summary-card present">
-                    <span>Present / Half-Day</span>
-                    <strong id="countPresent">0</strong>
-                </div>
-                <div class="summary-card absent">
-                    <span>Absent / Leave</span>
-                    <strong id="countAbsent">0</strong>
-                </div>
-            </div>
-
-            <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #fff; width: 100%;">
-                <input type="date" id="filterAttDate" class="form-input" onchange="window.filterAttTable()" style="padding: 8px; font-size: 12px; width: auto;" title="Filter by Date">
-                <button class="btn-outline" onclick="window.setAttFilterToday()" style="padding: 8px 12px; font-size: 12px;">Today</button>
                 
                 <select id="filterAttBranch" class="form-input" onchange="window.filterAttTable()" style="padding: 8px; font-size: 12px; width: auto;">
                     <option value="">All Branches</option>
                 </select>
 
-                <select id="filterAttStatus" class="form-input" onchange="window.filterAttTable()" style="padding: 8px; font-size: 12px; width: auto;">
-                    <option value="">All Statuses</option>
-                    <option value="present">Present</option>
-                    <option value="absent">Absent</option>
-                    <option value="leave">On Leave</option>
-                    <option value="half-day">Half-Day</option>
-                </select>
-
-                <div style="display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; flex: 1; min-width: 150px;">
+                <div style="display: flex; align-items: center; border: 1px solid var(--border); background: #fff; border-radius: 10px; padding: 0 8px; flex: 1; min-width: 150px;">
                     <span class="material-symbols-rounded" style="font-size: 16px; color: var(--text-muted);">search</span>
-                    <input type="text" id="attSearchInput" onkeyup="window.filterAttTable()" placeholder="Search Employee..." style="border: none; background: transparent; outline: none; font-size: 12px; width: 100%; margin-left: 6px;">
+                    <input type="text" id="attSearchInput" onkeyup="window.filterAttTable()" placeholder="Search Employee..." style="border: none; background: transparent; outline: none; font-size: 12px; width: 100%; margin-left: 6px; padding: 8px 0;">
                 </div>
                 
                 <button class="btn-outline" onclick="window.clearAttFilters()" style="padding: 8px; font-size: 12px;" title="Clear Filters">
@@ -290,10 +292,19 @@
             return `${day} ${month} ${year}`;
         }
 
-        // Set Default Date to Today
+        // Today context
         const todayString = new Date().toISOString().split('T')[0];
         document.getElementById("attDate").value = todayString;
-        document.getElementById("filterAttDate").value = todayString;
+
+        // UI Toggle
+        window.toggleSection = function(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'none' || el.style.display === '') {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        }
 
         // --- 1. LOAD DROPDOWNS (WITH RBAC) ---
         window.loadDropdowns = async function() {
@@ -303,6 +314,9 @@
                 const filterBranchSelect = document.getElementById('filterAttBranch');
                 const reportBranchSelect = document.getElementById('reportBranch');
                 
+                // Fetch User Session Profile
+                window.currentUser = window.currentUser || { role: 'admin', branch: 'Main' }; // Replace with Auth
+
                 if (window.currentUser && window.currentUser.role !== 'admin') {
                     const userBranch = window.currentUser.branch;
                     branchSelect.innerHTML = `<option value="${userBranch}">${userBranch}</option>`;
@@ -375,7 +389,7 @@
         }
 
         window.generateMonthlyReport = async function() {
-            const monthVal = document.getElementById('reportMonth').value; // YYYY-MM
+            const monthVal = document.getElementById('reportMonth').value; 
             const branchFilter = document.getElementById('reportBranch').value.toLowerCase();
             
             if(!monthVal) return alert("Please select a month first.");
@@ -388,7 +402,6 @@
 
             document.getElementById('monthlyEmptyMsg').style.display = 'none';
 
-            // Build Header
             let headHtml = `<tr><th style="width: 150px;">Branch</th><th style="width: 150px;">Name</th><th>Role</th>`;
             for(let i=1; i<=daysInMonth; i++) {
                 headHtml += `<th>${i}</th>`;
@@ -396,7 +409,6 @@
             headHtml += `<th>Total P</th></tr>`;
             document.getElementById('monthlyHead').innerHTML = headHtml;
 
-            // Fetch Month Data
             let q;
             if (window.currentUser && window.currentUser.role !== 'admin') {
                 q = query(collection(db, "daily_attendance"), where("branch", "==", window.currentUser.branch));
@@ -407,7 +419,6 @@
             const attData = [];
             snap.forEach(d => attData.push(d.data()));
 
-            // Filter Employees and Sort by Branch, then Name
             let filteredEmps = allEmployees;
             if (branchFilter && branchFilter !== 'all branches') {
                 filteredEmps = filteredEmps.filter(e => (e.branch || '').toLowerCase() === branchFilter);
@@ -418,7 +429,6 @@
                 return (a.name || '').localeCompare(b.name || '');
             });
 
-            // Build Rows
             let bodyHtml = '';
             filteredEmps.forEach(emp => {
                 let presentCount = 0;
@@ -437,8 +447,6 @@
                     if(record) {
                         if(record.status === 'Present') { mark = 'P'; cls = 'm-st-P'; presentCount++; }
                         else if(record.status === 'Half-Day') { mark = 'H'; cls = 'm-st-H'; presentCount += 0.5; }
-                        else if(record.status === 'Absent') { mark = 'A'; cls = 'm-st-A'; }
-                        else if(record.status === 'Leave') { mark = 'L'; cls = 'm-st-L'; }
                     }
                     rowHtml += `<td class="${cls}">${mark}</td>`;
                 }
@@ -468,7 +476,6 @@
             }, 1000);
         }
 
-        // CSV Export for Monthly Report Matrix
         window.exportMonthlyCSV = function() {
             const table = document.getElementById("monthTable");
             if (!table || table.rows.length === 0 || table.rows[0].cells.length === 0) {
@@ -479,7 +486,6 @@
             for (let i = 0; i < table.rows.length; i++) {
                 let rowData = [];
                 let cols = table.rows[i].querySelectorAll("td, th");
-                
                 for (let j = 0; j < cols.length; j++) {
                     let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
                     rowData.push('"' + text + '"');
@@ -531,9 +537,8 @@
                     const docId = item.id;
                     window.attDataCache[docId] = data;
 
-                    let badgeClass = 'badge-present';
-                    if (data.status === 'Absent') badgeClass = 'badge-absent';
-                    else if (data.status === 'Leave' || data.status === 'Half-Day') badgeClass = 'badge-leave';
+                    // Only Present or Half-Day in new flow
+                    let badgeClass = data.status === 'Half-Day' ? 'badge-halfday' : 'badge-present';
 
                     const tr = document.createElement('tr');
                     tr.setAttribute("data-date", data.date);
@@ -541,7 +546,6 @@
                     tr.setAttribute("data-status", data.status.toLowerCase());
                     tr.setAttribute("data-search", `${data.empName} ${data.empType}`.toLowerCase());
 
-                    // APPLYING DD MMM YYYY FORMAT TO THE VIEW
                     const formattedDate = window.formatDateToDDMMMYYYY(data.date);
 
                     tr.innerHTML = `
@@ -561,21 +565,19 @@
                     tableBody.appendChild(tr);
                 });
                 
-                window.filterAttTable();
+                window.setAttFilterToday(); // Apply Default Date View
 
             } catch (error) {
-                console.error("Firebase Read Error:", error);
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px; color: var(--danger);">Error loading data. Check Firestore rules.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px; color: var(--danger);">Error loading data.</td></tr>';
             }
         };
 
         setTimeout(() => window.loadAttendanceLog(), 500);
 
-        // --- 3. DYNAMIC FILTERING & COUNT CALCULATION ---
+        // --- 3. DYNAMIC FILTERING & DYNAMIC BRANCH CARD CALCULATION ---
         window.filterAttTable = function() {
-            const dateQuery = document.getElementById("filterAttDate").value;
+            const dateQuery = document.getElementById("filterAttDate").value; 
             const branchQuery = document.getElementById("filterAttBranch").value.toLowerCase();
-            const statusQuery = document.getElementById("filterAttStatus").value.toLowerCase();
             const textQuery = document.getElementById("attSearchInput").value.toLowerCase();
             
             const trs = document.getElementById("attTableBody").getElementsByTagName("tr");
@@ -585,13 +587,11 @@
                 
                 const rowDate = trs[i].getAttribute("data-date");
                 const rowBranch = trs[i].getAttribute("data-branch");
-                const rowStatus = trs[i].getAttribute("data-status");
                 const rowSearch = trs[i].getAttribute("data-search");
 
                 let show = true;
-                if (dateQuery && rowDate !== dateQuery) show = false;
+                if (dateQuery && rowDate !== dateQuery) show = false; 
                 if (branchQuery && rowBranch !== branchQuery) show = false;
-                if (statusQuery && rowStatus !== statusQuery) show = false;
                 if (textQuery && rowSearch.indexOf(textQuery) === -1) show = false;
 
                 trs[i].style.display = show ? "" : "none";
@@ -602,24 +602,45 @@
 
         window.calculateTotals = function() {
             const trs = document.getElementById("attTableBody").getElementsByTagName("tr");
-            let total = 0, present = 0, absent = 0;
+            let branchCounts = {};
+            let totalPresent = 0;
 
             for (let i = 0; i < trs.length; i++) {
                 if (trs[i].style.display !== "none" && trs[i].cells.length > 1) {
-                    total++;
                     const status = trs[i].getAttribute("data-status");
-                    if (status === 'present' || status === 'half-day') present++;
-                    if (status === 'absent' || status === 'leave') absent++;
+                    
+                    if (status === 'present' || status === 'half-day') {
+                        totalPresent++;
+                        const rawBranch = trs[i].getAttribute("data-branch") || 'Unknown';
+                        const branchName = rawBranch.charAt(0).toUpperCase() + rawBranch.slice(1);
+                        branchCounts[branchName] = (branchCounts[branchName] || 0) + 1;
+                    }
                 }
             }
 
-            document.getElementById('countTotal').innerText = total;
-            document.getElementById('countPresent').innerText = present;
-            document.getElementById('countAbsent').innerText = absent;
+            let dashHtml = `
+                <div class="summary-card" style="background: var(--primary); color: white;">
+                    <span style="color: #eaf1ff;">Total Present</span>
+                    <strong style="color: white;">${totalPresent}</strong>
+                </div>`;
+            
+            for(let b in branchCounts) {
+                dashHtml += `
+                <div class="summary-card present">
+                    <span>${b}</span>
+                    <strong>${branchCounts[b]}</strong>
+                </div>`;
+            }
+
+            if (totalPresent === 0) {
+                 dashHtml += `<div class="summary-card"><span>No Records</span><strong>0</strong></div>`;
+            }
+
+            document.getElementById('summaryDashboard').innerHTML = dashHtml;
         }
 
         window.setAttFilterToday = function() {
-            document.getElementById("filterAttDate").value = new Date().toISOString().split('T')[0];
+            document.getElementById("filterAttDate").value = todayString;
             window.filterAttTable();
         }
 
@@ -628,7 +649,6 @@
             if (window.currentUser && window.currentUser.role === 'admin') {
                 document.getElementById("filterAttBranch").value = "";
             }
-            document.getElementById("filterAttStatus").value = "";
             document.getElementById("attSearchInput").value = "";
             window.filterAttTable();
         }
@@ -677,14 +697,14 @@
                 }
 
                 window.resetAttForm();
+                document.getElementById('daily-entry-form').style.display = 'none';
                 window.loadAttendanceLog(); 
 
             } catch (error) {
-                console.error("Firebase Save Error:", error);
                 alert("Failed to save. Check database rules.");
             }
 
-            saveBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size: 18px;">how_to_reg</span> Save Attendance';
+            saveBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size: 18px;">how_to_reg</span> Mark Present';
             saveBtn.disabled = false;
         }
 
@@ -696,10 +716,19 @@
             document.getElementById('attDate').value = data.date;
             document.getElementById('attEmployee').value = data.empId;
             document.getElementById('attBranch').value = data.branch;
-            document.getElementById('attStatus').value = data.status;
+            
+            // Map legacy statuses smoothly to the visual dropdown or default to present
+            if(data.status === "Present" || data.status === "Half-Day") {
+                document.getElementById('attStatus').value = data.status;
+            } else {
+                document.getElementById('attStatus').value = "Present";
+            }
+
             document.getElementById('attNotes').value = data.notes || '';
 
             document.getElementById('saveAttBtn').innerHTML = '<span class="material-symbols-rounded" style="font-size: 18px;">update</span> Update Record';
+            
+            document.getElementById('daily-entry-form').style.display = 'block';
             
             const mainContent = document.getElementById('main-content');
             if(mainContent) mainContent.scrollTo({ top: 0, behavior: 'smooth' });
@@ -720,8 +749,8 @@
         window.resetAttForm = function() {
             document.getElementById('attendance-form').reset();
             document.getElementById('attDocId').value = '';
-            document.getElementById('attDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('saveAttBtn').innerHTML = '<span class="material-symbols-rounded" style="font-size: 18px;">how_to_reg</span> Save Attendance';
+            document.getElementById('attDate').value = todayString;
+            document.getElementById('saveAttBtn').innerHTML = '<span class="material-symbols-rounded" style="font-size: 18px;">how_to_reg</span> Mark Present';
             
             if (window.currentUser && window.currentUser.role !== 'admin') {
                 document.getElementById('attBranch').value = window.currentUser.branch;
