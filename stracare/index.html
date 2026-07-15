@@ -3,22 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CMB | Login | Stra Care</title>
+    <title>CMB Portal | Stra Care Workspace</title>
     
     <meta name="theme-color" content="#0052cc">
-    <meta name="description" content="STRA CARE - Cloud ERP & CRM for Growing Business">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="assets/logo.png">
-    
-    <link rel="icon" type="image/png" href="assets/logo.png">
+    <meta name="description" content="CMB Business Flow Application - Licensed Workspace">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <script src="auth.js"></script>
-
     <script>
         tailwind.config = {
             theme: { 
@@ -29,8 +22,8 @@
                             50: '#fef2f2', 
                             100: '#fee2e2', 
                             500: '#ef4444', 
-                            600: '#0052cc', /* Updated to Stra Care Teal */
-                            700: '#0052cc'  /* Darker Teal for hover states */
+                            600: '#0052cc', /* CMB Primary Blue */
+                            700: '#0043a8'  
                         } 
                     } 
                 } 
@@ -39,133 +32,143 @@
     </script>
     
     <style>
-        /* Crossed light grey background with subtle dot pattern for the left side */
+        /* Crossed light grey background with subtle dot pattern */
         .bg-crossed-pattern {
-            background: linear-gradient(135deg, #f9fafb 50%, #f3f4f6 50%);
+            background: linear-gradient(135deg, #ffffff 50%, #f8fafc 50%);
             position: relative;
         }
         .bg-crossed-pattern::before {
             content: '';
             position: absolute;
             inset: 0;
-            background-image: radial-gradient(#e5e7eb 1.5px, transparent 1.5px);
-            background-size: 24px 24px;
-            opacity: 0.6;
+            background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+            background-size: 32px 32px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .hover-float {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-float:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 82, 204, 0.15);
+        }
+
+        /* Splash Screen Fade Out Class */
+        .fade-out {
+            opacity: 0;
             pointer-events: none;
         }
     </style>
 </head>
-<body class="bg-white text-slate-800 font-sans antialiased min-h-screen flex flex-col md:flex-row selection:bg-brand-100 selection:text-brand-700">
+<body class="bg-white text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-100 selection:text-brand-700 bg-crossed-pattern">
 
-    <div class="w-full md:w-5/12 lg:w-1/2 bg-crossed-pattern border-b md:border-b-0 md:border-r border-slate-200 p-10 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[35vh] md:min-h-screen z-10 relative">
-        
-        <div class="relative z-10 w-full max-w-lg mx-auto md:mx-0 flex flex-col items-center md:items-start">
-            <img src="assets/name.png" alt="Logo" class="h-16 w-48 object-contain mb-10 drop-shadow-sm" onerror="this.src='https://via.placeholder.com/150x50?text=STRA+CARE'">
-            
-            <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight mb-4 tracking-tight">
-                The One App to<br/>
-                <span class="text-brand-600">Grow your Business.</span>
-            </h1>
-            
-            <p class="text-lg md:text-xl text-slate-600 font-semibold tracking-wide uppercase">
-                Count . Connect . Grow
-            </p>
+    <div id="splash-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-white to-gray-200 transition-opacity duration-700 ease-in-out">
+        <img src="assets/logo.png" alt="CMB Business Flow" class="w-48 h-16 object-contain aspect-[3/1] animate-pulse" onerror="this.src='https://via.placeholder.com/150x50?text=CMB+LOGO'">
+        <div class="mt-6 flex gap-1">
+            <div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce" style="animation-delay: 0s;"></div>
+            <div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+            <div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce" style="animation-delay: 0.4s;"></div>
         </div>
     </div>
 
-    <div class="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center p-6 md:p-12 bg-white flex-grow relative z-20 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.05)] md:shadow-none">
+    <nav class="w-full relative z-20 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <img src="assets/logo.png" alt="CMB" class="w-36 h-12 object-contain aspect-[3/1]" onerror="this.src='https://via.placeholder.com/150x50?text=CMB'">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest hidden md:block pl-3 border-l border-slate-300">Workspace Portal</span>
+        </div>
         
-        <div class="max-w-md w-full bg-white rounded-3xl p-4 sm:p-8">
+        <a href="https://cmfilings.com" target="_blank" class="text-sm font-semibold text-slate-500 hover:text-brand-600 flex items-center gap-2 transition-colors">
+            <i data-lucide="life-buoy" class="w-4 h-4"></i> CMB Support
+        </a>
+    </nav>
+
+    <main class="flex-grow flex flex-col justify-center items-center px-4 relative z-10 w-full max-w-5xl mx-auto text-center py-10 md:py-16">
+        
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 text-brand-600 font-semibold text-sm mb-8 border border-brand-100">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-500 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
+            </span>
+            System Online & Ready
+        </div>
+
+        <p class="text-slate-500 font-bold tracking-widest uppercase mb-4 text-sm">Welcome Back To Your Workspace</p>
+        
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-8 flex flex-col items-center max-w-md w-full mx-auto">
+            <img src="assets/logo-stra.png" alt="Stra Care" class="h-14 object-contain mb-3" onerror="this.src='https://via.placeholder.com/150x50?text=STRA+CARE'">
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800">Stra Care Physiotherapy</h2>
+            <p class="text-sm text-slate-500 font-medium">Administration Management</p>
+        </div>
+        
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight tracking-tight mb-6">
+            Powered by the <br class="hidden md:block"/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-blue-400">CMB Business Flow Application</span>
+        </h1>
+        
+        <p class="text-base md:text-lg text-slate-600 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
+            The complete ERP & CRM suite made for growing businesses. Securely manage your appointments, patient data, staff, and billing all in one place.
+        </p>
+        
+        <a href="login.html" class="inline-flex justify-center items-center gap-2 px-8 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all shadow-[0_4px_14px_0_rgba(0,82,204,0.39)] hover:shadow-[0_6px_20px_rgba(0,82,204,0.23)] hover:-translate-y-0.5 text-lg">
+            Proceed to Secure Login <i data-lucide="lock" class="w-5 h-5"></i>
+        </a>
+
+    </main>
+
+    <section class="relative z-10 w-full max-w-6xl mx-auto px-4 pb-20">
+        <p class="text-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Your Active CMB Modules</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            <div class="text-center mb-10">
-                <p class="text-slate-500 text-sm mt-2 font-medium">Welcome Back</p>
-                <h2 class="text-3xl font-bold text-slate-900 tracking-tight">STRA CARE</h2>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover-float flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-blue-50 text-brand-600 rounded-xl flex items-center justify-center mb-4">
+                    <i data-lucide="calendar-check" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">Smart Scheduling</h3>
+                <p class="text-sm text-slate-500 font-medium">Manage daily timesheets, doctor allocations, and bulk rescheduling effortlessly.</p>
             </div>
-            
-            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="flex flex-col gap-6">
-                
-                <div id="errorMsg" class="hidden bg-red-50 text-red-600 text-sm font-bold p-3.5 rounded-xl border border-red-100 text-center flex items-center justify-center gap-2">
-                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                    Invalid Username or Password.
-                </div>
 
-                <div>
-                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Username</label>
-                    <div class="relative">
-                        <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input type="text" id="username" required placeholder="Enter username" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 transition-all font-medium placeholder-slate-400">
-                    </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover-float flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-blue-50 text-brand-600 rounded-xl flex items-center justify-center mb-4">
+                    <i data-lucide="users" class="w-6 h-6"></i>
                 </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">CRM Directory</h3>
+                <p class="text-sm text-slate-500 font-medium">Auto-fetch returning clients, track outstanding balances, and log history securely.</p>
+            </div>
 
-                <div>
-                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Password</label>
-                    <div class="relative">
-                        <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input type="password" id="password" required placeholder="Enter password" class="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 transition-all font-medium placeholder-slate-400">
-                        <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 focus:outline-none transition-colors">
-                            <i data-lucide="eye" id="eyeIcon" class="w-5 h-5"></i>
-                        </button>
-                    </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover-float flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-blue-50 text-brand-600 rounded-xl flex items-center justify-center mb-4">
+                    <i data-lucide="receipt" class="w-6 h-6"></i>
                 </div>
-
-                <div class="flex items-center justify-between mt-[-4px]">
-                    <label class="flex items-center gap-2.5 cursor-pointer group">
-                        <input type="checkbox" id="remember" class="w-4 h-4 text-brand-600 border-slate-300 rounded focus:ring-brand-500 transition-colors cursor-pointer">
-                        <span class="text-sm text-slate-600 font-medium group-hover:text-slate-900 transition-colors select-none">Remember Password</span>
-                    </label>
-                </div>
-
-                <button type="submit" id="loginBtn" class="mt-2 w-full py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all shadow-[0_4px_14px_0_rgba(15,118,110,0.39)] hover:shadow-[0_6px_20px_rgba(15,118,110,0.23)] hover:-translate-y-0.5 flex justify-center items-center gap-2 text-base">
-                    Sign In <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                </button>
-            </form>
-            
-            <div class="mt-10 pt-6 border-t border-slate-100 text-center">
-                <a href="https://cmfilings.com" target="_blank" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-brand-600 transition-colors">
-                    <i data-lucide="headphones" class="w-4 h-4"></i>
-                    Contact Support
-                </a>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">Automated Billing</h3>
+                <p class="text-sm text-slate-500 font-medium">Generate A4 invoices instantly and track all financial transactions per branch.</p>
             </div>
 
         </div>
-    </div>
+    </section>
+
+    <footer class="w-full relative z-20 py-6 border-t border-slate-200 bg-white/80 backdrop-blur-md text-center">
+        <p class="text-sm font-medium text-slate-500">
+            &copy; <script>document.write(new Date().getFullYear())</script> <strong class="text-slate-800">CMB Business Flow Application</strong>. All rights reserved.
+        </p>
+        <p class="text-xs text-slate-400 mt-1">Licensed to Stra Care Physiotherapy.</p>
+    </footer>
 
     <script>
+        // Initialize Lucide Icons
         lucide.createIcons();
 
-        // Redirect if already logged in
-        if (getCurrentUser()) {
-            window.location.href = 'dashboard.html';
-        }
-
-        // Handle the login form submission
-        function handleLoginSubmit(e) {
-            e.preventDefault();
-            const u = document.getElementById('username').value.trim();
-            const p = document.getElementById('password').value.trim();
-            const err = document.getElementById('errorMsg');
-
-            if (attemptLogin(u, p)) {
-                err.classList.add('hidden');
-                window.location.href = 'dashboard.html'; // Go to dashboard on success
-            } else {
-                err.classList.remove('hidden');
-            }
-        }
-
-        // Toggle password visibility
-        function togglePassword() {
-            const pwd = document.getElementById('password');
-            const icon = document.getElementById('eyeIcon');
-            if (pwd.type === 'password') {
-                pwd.type = 'text';
-                icon.setAttribute('data-lucide', 'eye-off');
-            } else {
-                pwd.type = 'password';
-                icon.setAttribute('data-lucide', 'eye');
-            }
-            lucide.createIcons();
-        }
+        // Splash Screen Logic
+        window.addEventListener('load', () => {
+            const splash = document.getElementById('splash-screen');
+            // Wait 1.5 seconds so the user can see the splash screen, then fade out
+            setTimeout(() => {
+                splash.classList.add('fade-out');
+                // Remove from DOM after fade transition completes
+                setTimeout(() => splash.remove(), 700); 
+            }, 1500); 
+        });
     </script>
 </body>
 </html>
