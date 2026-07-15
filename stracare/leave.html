@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CMB Employee Leave Submission | Stra Care</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"/>
+</head>
+<body>
+
+<div class="module-container" id="leave-module">
+    
+    <style>
+        :root {
+            /* Zoho Blue Theme */
+            --primary: #0062FF; 
+            --primary-light: #eaf1ff;
+            --bg: #F8F9FA;
+            --surface: #ffffff;
+            --text-main: #0a0a0a;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --grey-med: #D9D9D9;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+        }
+
+        body { background: var(--bg); margin: 0; padding: 20px; }
+        #leave-module { font-family: 'Inter', sans-serif; width: 100%; max-width: 1000px; margin: 0 auto; }
+        
+        #leave-module .section-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        
+        #leave-module .form-card { background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 24px; }
+        #leave-module .form-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+        
+        #leave-module .input-group { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; }
+        @media (min-width: 768px) { #leave-module .input-group { grid-template-columns: 1fr 1fr; } }
+        @media (min-width: 1024px) { #leave-module .input-group.three-cols { grid-template-columns: 1fr 1fr 1fr; } }
+
+        #leave-module .form-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px; color: var(--text-main); background: #FAFAFA; outline: none; transition: border 0.2s; box-sizing: border-box; }
+        #leave-module .form-input:focus { border-color: var(--primary); background: var(--surface); }
+        
+        #leave-module .btn-primary { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+        #leave-module .btn-primary:hover { opacity: 0.9; }
+        #leave-module .btn-outline { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        #leave-module .btn-outline:hover { background: #FAFAFA; }
+
+        /* Table Styling */
+        #leave-module .table-container { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
+        #leave-module .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        #leave-module .table-responsive { width: 100%; overflow-x: auto; }
+        #leave-module .saas-table { width: 100%; min-width: 800px; border-collapse: collapse; text-align: left; }
+        #leave-module .saas-table th { padding: 12px 16px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; background: #FAFAFA; border-bottom: 1px solid var(--border); }
+        #leave-module .saas-table td { padding: 16px; font-size: 14px; font-weight: 500; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; white-space: nowrap; }
+        .badge-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .badge-approved { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .badge-rejected { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    </style>
+
+    <div class="section-title">
+        <span class="material-symbols-rounded" style="color: var(--primary);">event_busy</span>
+        <h2 style="margin: 0;">Employee Leave Submission</h2>
+    </div>
+
+    <div class="form-card">
+        <h4 style="color: var(--primary); margin: 0 0 16px 0; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Request New Leave</h4>
+        <form id="leave-form" onsubmit="event.preventDefault(); submitLeave();">
+            
+            <div class="input-group three-cols">
+                <div>
+                    <label class="form-label">Employee Name *</label>
+                    <input type="text" id="leaveName" class="form-input" placeholder="Your Full Name" required>
+                </div>
+                <div>
+                    <label class="form-label">Branch *</label>
+                    <select id="leaveBranch" class="form-input" required>
+                        <option value="">Select Branch</option>
+                        <option value="Main">Main Branch</option>
+                        <option value="Mahe">Mahe</option>
+                        <option value="Chokli">Chokli</option>
+                        <option value="Panoor">Panoor</option>
+                        <option value="Koothuparamba">Koothuparamba</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Leave Type *</label>
+                    <select id="leaveType" class="form-input" required>
+                        <option value="">Select Type</option>
+                        <option value="Casual Leave">Casual Leave</option>
+                        <option value="Sick Leave">Sick Leave</option>
+                        <option value="Annual Leave">Annual Leave</option>
+                        <option value="Unpaid Leave">Unpaid Leave (LWP)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group three-cols">
+                <div>
+                    <label class="form-label">From Date *</label>
+                    <input type="date" id="leaveFrom" class="form-input" required>
+                </div>
+                <div>
+                    <label class="form-label">To Date *</label>
+                    <input type="date" id="leaveTo" class="form-input" required>
+                </div>
+                <div>
+                    <label class="form-label">Total Days</label>
+                    <input type="number" id="leaveDays" class="form-input" placeholder="Auto-calculated" readonly style="background: transparent; border: none; font-weight: bold; color: var(--primary);">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div style="grid-column: 1 / -1;">
+                    <label class="form-label">Reason for Leave *</label>
+                    <textarea id="leaveReason" class="form-input" rows="3" placeholder="Briefly explain the reason for your leave request..." required></textarea>
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-top: 16px;">
+                <button type="button" class="btn-outline" style="margin-right: 12px;" onclick="document.getElementById('leave-form').reset();">Clear</button>
+                <button type="submit" class="btn-primary">Submit Request</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <div class="table-header">
+            <h4 style="margin:0;">Leave Application History</h4>
+        </div>
+        <div class="table-responsive">
+            <table class="saas-table">
+                <thead>
+                    <tr>
+                        <th>Applied On</th>
+                        <th>Employee Details</th>
+                        <th>Leave Type</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="leaveTableBody">
+                    <tr>
+                        <td>12/10/2023</td>
+                        <td><strong>John Doe</strong><br><span style="font-size:12px; color:var(--text-muted);">Main Branch</span></td>
+                        <td>Sick Leave</td>
+                        <td><strong>15/10/2023</strong> to <strong>16/10/2023</strong><br><span style="font-size:12px; color:var(--text-muted);">2 Days</span></td>
+                        <td><span class="badge badge-approved">Approved</span></td>
+                    </tr>
+                    <tr>
+                        <td>25/10/2023</td>
+                        <td><strong>Sarah Smith</strong><br><span style="font-size:12px; color:var(--text-muted);">Mahe</span></td>
+                        <td>Casual Leave</td>
+                        <td><strong>01/11/2023</strong> to <strong>01/11/2023</strong><br><span style="font-size:12px; color:var(--text-muted);">1 Day</span></td>
+                        <td><span class="badge badge-pending">Pending</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Auto-calculate total days between From and To dates
+        document.getElementById('leaveFrom').addEventListener('change', calculateDays);
+        document.getElementById('leaveTo').addEventListener('change', calculateDays);
+
+        function calculateDays() {
+            const from = document.getElementById('leaveFrom').value;
+            const to = document.getElementById('leaveTo').value;
+            
+            if(from && to) {
+                const date1 = new Date(from);
+                const date2 = new Date(to);
+                const diffTime = Math.abs(date2 - date1);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include the start day
+                
+                if(date2 < date1) {
+                    alert("'To Date' cannot be before 'From Date'");
+                    document.getElementById('leaveTo').value = "";
+                    document.getElementById('leaveDays').value = "";
+                } else {
+                    document.getElementById('leaveDays').value = diffDays + (diffDays > 1 ? " Days" : " Day");
+                }
+            }
+        }
+
+        // Mock Submit Function
+        function submitLeave() {
+            alert("Leave Request Submitted Successfully!");
+            document.getElementById('leave-form').reset();
+            document.getElementById('leaveDays').value = "";
+            // Add your Firebase addDoc logic here similar to appointments
+        }
+    </script>
+</div>
+</body>
+</html>
