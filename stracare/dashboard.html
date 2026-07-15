@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CMB | The Business Flow App</title>
+    <title>bizze - Clinic Management Dashboard</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="auth.js"></script>
+
+    <script src="auth.js"></script>
+
     <script>
         window.onerror = function(message, source, lineno, colno, error) {
             const errDiv = document.getElementById('dash-error-banner');
@@ -22,17 +24,18 @@
     
     <style>
         :root {
-            --primary: #e16349;
-            --primary-light: #fef5e8; 
-            --bg: #F8F5F1;
+            /* Professional Grey-Blue & Zoho Blue Theme */
+            --primary: #0052cc; /* Zoho Blue */
+            --primary-light: #e0e9f5; 
+            --bg: #f4f6f8; /* Soft grey-blue background */
             --surface: #ffffff;
-            --text-main: #0a0a0a;
-            --text-muted: #777777;
-            --border: #E8E5E1;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             --success: #10B981;
-            --warning: #FB923C; 
-            --secondary: #64748B;
+            --warning: #F59E0B; 
+            --secondary: #4b5563;
             --danger: #ef4444; 
         }
 
@@ -59,7 +62,7 @@
         .fin-stat-info { display: flex; flex-direction: column; }
         .fin-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;}
         .fin-amount { font-size: 24px; font-weight: 800; color: var(--text-main); }
-        .fin-stat.alert .fin-amount { color: var(--primary); }
+        .fin-stat.alert .fin-amount { color: var(--danger); }
         .fin-icon { font-size: 32px; color: var(--border); }
         .fin-stat.alert .fin-icon { color: #fca5a5; }
 
@@ -78,14 +81,13 @@
         .cal-day-name { font-size: 10px; font-weight: 700; color: var(--text-muted); padding-bottom: 8px; text-transform: uppercase;}
         .cal-day { padding: 8px 0; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; border: 1px solid transparent; position: relative;}
         .cal-day:hover { background: #FAFAFA; border-color: var(--border); }
-        .cal-day.active { background: var(--primary); color: white; font-weight: 700; box-shadow: 0 4px 10px rgba(225, 99, 73, 0.3);}
+        .cal-day.active { background: var(--primary); color: white; font-weight: 700; box-shadow: 0 4px 10px rgba(0, 82, 204, 0.3);}
         .cal-day.has-event::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--text-main); }
         .cal-day.active.has-event::after { background: white; }
         .cal-day.empty { pointer-events: none; }
 
         .dash-table-wrapper { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; width: 100%; margin-bottom: 40px; }
         
-        /* Table Responsive handles Google Sheets style scrolling */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .saas-table { width: 100%; min-width: 800px; border-collapse: collapse; text-align: left; }
         .saas-table th { padding: 14px 20px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; background: #FAFAFA; border-bottom: 1px solid var(--border); letter-spacing: 0.5px;}
@@ -100,7 +102,6 @@
 
         .dash-error { display: none; background: #FEF2F2; border: 1px solid #FCA5A5; color: var(--danger); padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 20px; align-items: center; gap: 8px; }
 
-        /* FIXED MOBILE CSS: Removed the code that breaks tables into cards */
         @media (max-width: 768px) {
             #sidebar-container { position: fixed; z-index: 1000; transform: translateX(-100%); width: 280px; box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
             #sidebar-container.open { transform: translateX(0); }
@@ -110,13 +111,28 @@
     </style>
 </head>
 <body>
+
+    <div id="app-container" style="display: flex; height: 100vh; width: 100vw; overflow: hidden;">
+        
+        <div id="sidebar-container"></div>
+
+        <div class="main-wrapper">
+            <div id="header-container"></div>
+
+            <main id="main-content">
+                
+                <div id="view-dashboard" class="view-section active">
+                    
+                    <div id="dash-error-banner" class="dash-error">
+                        <span class="material-symbols-rounded">error</span>
+                        <span id="dash-error-text">Database connection failed.</span>
                     </div>
+
                     <h2 style="font-size: 22px; margin-bottom: 4px; font-weight: 700;">
                         <span style="color: var(--text-main);">Welcome,</span> 
                         <span style="color: var(--primary);">Stra Care</span>
                     </h2>
 
-                    <!-- Dynamic Branch Display -->
                     <h3 style="font-size: 15px; font-weight: 600; color: var(--secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                         <span class="material-symbols-rounded" style="font-size: 18px;">storefront</span>
                         <span id="dash-branch-text">Loading...</span>
@@ -127,27 +143,32 @@
                     <div class="dash-top-row">
                         
                         <div class="dash-card">
-                            <div class="card-title">Financial Summary</div>
+                            <div class="card-title">
+                                Employee Attendance (Today)
+                                <button onclick="window.switchView('view-attendance', null)" style="background: none; border: none; color: var(--primary); cursor: pointer; display: flex; align-items: center;" title="View Attendance Module">
+                                    <span class="material-symbols-rounded" style="font-size: 18px;">open_in_new</span>
+                                </button>
+                            </div>
                             <div class="fin-stat-container">
+                                <div class="fin-stat" style="background: #ECFDF5; border-color: #D1FAE5;">
+                                    <div class="fin-stat-info">
+                                        <div class="fin-label">Present Today</div>
+                                        <div class="fin-amount" id="dashPresentStaff" style="color: var(--success);">0</div>
+                                    </div>
+                                    <span class="material-symbols-rounded fin-icon" style="color: var(--success);">how_to_reg</span>
+                                </div>
                                 <div class="fin-stat alert">
                                     <div class="fin-stat-info">
-                                        <div class="fin-label">Unpaid Dues (Pending)</div>
-                                        <div class="fin-amount" id="dashUnpaidBills">₹ 0</div>
+                                        <div class="fin-label">Absent / Leave Today</div>
+                                        <div class="fin-amount" id="dashAbsentStaff">0</div>
                                     </div>
-                                    <span class="material-symbols-rounded fin-icon">account_balance_wallet</span>
-                                </div>
-                                <div class="fin-stat">
-                                    <div class="fin-stat-info">
-                                        <div class="fin-label">Total Volume (All Time)</div>
-                                        <div class="fin-amount" id="dashTotalApts">0 <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Bookings</span></div>
-                                    </div>
-                                    <span class="material-symbols-rounded fin-icon">monitoring</span>
+                                    <span class="material-symbols-rounded fin-icon">person_off</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="dash-card">
-                            <div class="card-title">Schedule Breakdown</div>
+                            <div class="card-title">Volume Breakdown <span id="volumeDateLabel" style="font-weight: 500; font-size: 12px; color: var(--text-muted);">(Today)</span></div>
                             <div class="chart-container">
                                 <canvas id="apptDonutChart"></canvas>
                             </div>
@@ -235,6 +256,20 @@
     </div> 
     
     <script>
+        // Setup initial user context based on external auth.js
+        // auth.js should ideally handle defining window.currentUser and redirecting if missing
+        if (!window.currentUser) {
+            // Mock fallback if auth.js loads asynchronously, will be overridden by auth.js logic
+            window.currentUser = { role: "admin", branch: "Main" }; 
+        }
+
+        window.handleLogout = function() {
+            window.currentUser = null;
+            localStorage.removeItem('straCareUser');
+            localStorage.removeItem('straCarePass');
+            localStorage.setItem('straCareRemember', 'false');
+            window.location.href = 'login.html'; 
+        };
 
         // Global UI State
         window.allApts = [];
@@ -344,7 +379,7 @@
 
                 const total = pending + completed + rescheduled + cancelled;
                 const dataValues = total === 0 ? [1] : [pending, completed, rescheduled, cancelled];
-                const bgColors = total === 0 ? ['#F0F0F0'] : ['#FB923C', '#10B981', '#64748B', '#ef4444'];
+                const bgColors = total === 0 ? ['#e5e7eb'] : ['#F59E0B', '#10B981', '#4b5563', '#ef4444'];
                 const labels = total === 0 ? ['No Data'] : ['Pending', 'Completed', 'Rescheduled', 'Cancelled'];
 
                 window.apptChartInstance = new Chart(ctx, {
@@ -382,10 +417,43 @@
             window.renderCalendar();
         };
 
+        // NEW: Updates chart and volume stats exclusively for the selected date
+        window.updateDailyMetrics = function() {
+            let cPending = 0, cCompleted = 0, cRescheduled = 0, cCancelled = 0;
+            const dayApts = window.allApts.filter(a => a.date === window.selectedDateStr);
+
+            dayApts.forEach(data => {
+                const status = (data.status || '').toLowerCase();
+                if(status === 'pending') cPending++;
+                else if(status === 'completed') cCompleted++;
+                else if(status === 'rescheduled') cRescheduled++;
+                else if(status === 'cancelled') cCancelled++;
+            });
+
+            const dPend = document.getElementById('dashPending');
+            if(dPend) dPend.innerText = cPending;
+            
+            const dComp = document.getElementById('dashCompleted');
+            if(dComp) dComp.innerText = cCompleted;
+            
+            const dResch = document.getElementById('dashRescheduled');
+            if(dResch) dResch.innerText = cRescheduled;
+            
+            const dCanc = document.getElementById('dashCancelled');
+            if(dCanc) dCanc.innerText = cCancelled;
+
+            const dateLabel = document.getElementById('volumeDateLabel');
+            const todayStr = new Date().toISOString().split('T')[0];
+            if(dateLabel) dateLabel.innerText = (window.selectedDateStr === todayStr) ? "(Today)" : `(${window.formatIndianDate(window.selectedDateStr)})`;
+
+            if(window.renderChart) window.renderChart(cPending, cCompleted, cRescheduled, cCancelled);
+        };
+
         window.selectDate = function(dateStr) {
             window.selectedDateStr = dateStr;
             window.renderCalendar(); 
             window.renderLiveTable(); 
+            window.updateDailyMetrics(); 
         };
 
         window.setCalToToday = function() {
@@ -464,11 +532,20 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            window.checkAutoLogin();
             window.loadComponent('header-container', 'header.html');
             window.loadComponent('sidebar-container', 'sidebar.html');
             window.loadComponent('bottomnav-container', 'bottomnav.html');
             setInterval(window.updateGlobalClock, 1000);
+            
+            const branchTextElement = document.getElementById('dash-branch-text');
+            if (window.currentUser) {
+                if (window.currentUser.role === 'admin') {
+                    branchTextElement.innerText = "Master Access (All Branches)";
+                    branchTextElement.style.color = "var(--primary)";
+                } else {
+                    branchTextElement.innerText = window.currentUser.branch;
+                }
+            }
         });
     </script>
 
@@ -504,9 +581,6 @@
 
                 const snap = await getDocs(q);
                 
-                let unpaidTotal = 0;
-                let cPending = 0, cCompleted = 0, cRescheduled = 0, cCancelled = 0;
-
                 window.allApts = [];
                 window.aptDatesSet.clear();
                 
@@ -516,42 +590,26 @@
                 snap.forEach(doc => {
                     const data = doc.data();
                     window.allApts.push(data);
-                    
                     if(data.date) window.aptDatesSet.add(data.date);
-
-                    let bal = parseFloat(data.balance) || 0;
-                    if(bal > 0) unpaidTotal += bal;
-
-                    const status = (data.status || '').toLowerCase();
-                    if(status === 'pending') cPending++;
-                    else if(status === 'completed') cCompleted++;
-                    else if(status === 'rescheduled') cRescheduled++;
-                    else if(status === 'cancelled') cCancelled++;
                 });
 
                 window.allApts.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
-                const uBillObj = document.getElementById('dashUnpaidBills');
-                if(uBillObj) uBillObj.innerText = `₹ ${unpaidTotal.toLocaleString('en-IN')}`;
-                
-                const tAptObj = document.getElementById('dashTotalApts');
-                if(tAptObj) tAptObj.innerHTML = `${window.allApts.length} <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Bookings</span>`;
-                
-                const dPend = document.getElementById('dashPending');
-                if(dPend) dPend.innerText = cPending;
-                
-                const dComp = document.getElementById('dashCompleted');
-                if(dComp) dComp.innerText = cCompleted;
-                
-                const dResch = document.getElementById('dashRescheduled');
-                if(dResch) dResch.innerText = cRescheduled;
-                
-                const dCanc = document.getElementById('dashCancelled');
-                if(dCanc) dCanc.innerText = cCancelled;
+                /* * NOTE: For actual live attendance data, you will need to add a Firestore query 
+                 * to your 'attendance' collection here. 
+                 * Example placeholders below:
+                 */
+                const presentStaff = document.getElementById('dashPresentStaff');
+                if(presentStaff) presentStaff.innerText = "0"; // Update with real staff count
+                const absentStaff = document.getElementById('dashAbsentStaff');
+                if(absentStaff) absentStaff.innerText = "0"; // Update with real absent count
 
-                if(window.renderChart) window.renderChart(cPending, cCompleted, cRescheduled, cCancelled);
+                // Render UI Components
                 if(window.renderCalendar) window.renderCalendar();
                 if(window.renderLiveTable) window.renderLiveTable();
+                
+                // Calculates the metrics exclusively based on selectedDateStr (defaults to today)
+                if(window.updateDailyMetrics) window.updateDailyMetrics();
 
             } catch (error) {
                 console.error("Dashboard Load Error:", error);
@@ -562,6 +620,11 @@
                 }
             }
         };
+
+        // Initialize fetch if user is loaded by auth.js
+        if(window.currentUser) {
+            window.fetchDashboardData();
+        }
     </script>
 </body>
 </html>
