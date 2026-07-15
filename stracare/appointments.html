@@ -14,7 +14,7 @@
     <style>
         :root {
             /* Zoho Blue Theme */
-            --primary: #0052cc; 
+            --primary: #0062FF; 
             --primary-light: #eaf1ff;
             --bg: #F8F9FA;
             --surface: #ffffff;
@@ -30,81 +30,7 @@
         }
 
         #appointment-module { font-family: 'Inter', sans-serif; width: 100%; max-width: 1200px; margin: 0 auto; padding: 16px;}
-        <script type="module">
-        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-        const firebaseConfig = { /* Your Config */ };
-        const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-        const db = getFirestore(app);
-
-        // --- 1. LOGIN & BRANCH PROTECTION ---
-        // REPLACE THIS with your actual app-wide user session management
-        window.currentUser = window.currentUser || { role: 'admin', branch: 'Main' }; 
-
-        window.loadBranchesForApt = async function() {
-            const branchSelect = document.getElementById('aptBranch');
-            const filterSelect = document.getElementById('filterBranch');
-            
-            // Protection Logic
-            if (window.currentUser && window.currentUser.role !== 'admin') {
-                const userBranch = window.currentUser.branch;
-                branchSelect.innerHTML = `<option value="${userBranch}">${userBranch}</option>`;
-                filterSelect.innerHTML = `<option value="${userBranch}">${userBranch}</option>`;
-                
-                branchSelect.style.pointerEvents = 'none';
-                branchSelect.style.background = 'var(--grey-med)';
-                filterSelect.style.display = 'none'; 
-                window.allBranchesString = userBranch;
-                return; 
-            }
-
-            // Admin flow remains as before...
-            try {
-                const snap = await getDocs(collection(db, "branches"));
-                let branchList = [];
-                snap.forEach(doc => { if(doc.data().name) branchList.push(doc.data().name); });
-                branchList.sort();
-                window.allBranchesString = branchList.join(" | ");
-
-                let bHtml = '<option value="">Select Branch</option>';
-                let fHtml = '<option value="">All Branches</option>';
-                branchList.forEach(bName => {
-                    bHtml += `<option value="${bName}">${bName}</option>`;
-                    fHtml += `<option value="${bName}">${bName}</option>`;
-                });
-                branchSelect.innerHTML = bHtml;
-                filterSelect.innerHTML = fHtml;
-            } catch(e) { console.error(e); }
-        };
-
-        // --- 2. DATA FETCHING WITH ROLE PROTECTION ---
-        window.loadAppointments = async function() {
-            const tableBody = document.getElementById('aptTableBody');
-            try {
-                let q;
-                // Enforce Branch Query via Role
-                if (window.currentUser && window.currentUser.role !== 'admin') {
-                    q = query(collection(db, "appointments"), where("branch", "==", window.currentUser.branch));
-                } else {
-                    q = query(collection(db, "appointments"));
-                }
-                
-                const querySnapshot = await getDocs(q);
-                // ... (Continue processing appointments as before)
-            } catch(e) { console.error(e); }
-        };
-
-        // --- Ensure Load on Window Start ---
-        window.onload = () => {
-            window.loadBranchesForApt();
-            window.loadTherapistsForApt();
-            window.loadAppointments();
-            
-            // Initialize Date Picker Restrictions
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('aptDate').setAttribute('min', today);
-        }
+        
         #appointment-module .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
         
         /* Action Bar */
@@ -401,10 +327,10 @@
         window.appointmentsDataCache = {};
         window.allBranchesString = "";
         
-        // Mock current user object (Replace with your actual Firebase Auth object)
+        // Mock current user object (Replace with your actual Firebase Auth object or logic)
         window.currentUser = window.currentUser || { role: 'admin', branch: 'Main' };
 
-        // --- SAFE DYNAMIC LOADERS (Branches & Doctors) ---
+        // --- DYNAMIC LOADERS ---
         window.loadBranchesForApt = async function() {
             const branchSelect = document.getElementById('aptBranch');
             const filterSelect = document.getElementById('filterBranch');
@@ -444,20 +370,7 @@
         };
 
         window.loadTherapistsForApt = async function() {
-            const therapistSelect = document.getElementById('aptFormTherapist');
-            try {
-                const snap = await getDocs(collection(db, "therapists"));
-                let thList = [];
-                snap.forEach(doc => { 
-                    const tName = doc.data().name;
-                    if(tName) thList.push(tName); 
-                });
-                thList.sort();
-
-                let html = '<option value="">Select Doctor/Therapist</option>';
-                thList.forEach(tName => html += `<option value="${tName}">Dr. ${tName}</option>`);
-                therapistSelect.innerHTML = html;
-            } catch(e) { console.error("Error loading therapists"); }
+            // Therapist population logic occurs inside loadAppointments to gather both existing and historic doctors
         };
 
         // --- UTILS & UI TOGGLES ---
@@ -512,7 +425,13 @@
                 let aptsList = [];
                 querySnapshot.forEach(docSnap => aptsList.push({ id: docSnap.id, data: docSnap.data() }));
 
+                tableBody.innerHTML = '';
+                window.appointmentsDataCache = {}; 
+                const today = new Date().toISOString().split('T')[0];
+                let todayApts = [];
+
                 aptsList.sort((a, b) => new Date(b.data.date || 0) - new Date(a.data.date || 0));
+                
                 const groupedApts = {};
                 aptsList.forEach(item => {
                     const th = item.data.therapist || 'Unassigned';
@@ -520,16 +439,29 @@
                     groupedApts[th].push(item);
                 });
 
-                tableBody.innerHTML = '';
-                window.appointmentsDataCache = {}; 
-                const today = new Date().toISOString().split('T')[0];
-                let todayApts = [];
-                
+                // Get complete list of all therapists (historic + current database list) to build the timesheet properly
+                const tSnap = await getDocs(collection(db, "therapists"));
+                let allDoctorsSet = new Set();
+                tSnap.forEach(d => { if(d.data().name) allDoctorsSet.add(d.data().name); });
+                Object.keys(groupedApts).forEach(d => allDoctorsSet.add(d));
+                const finalDoctorsList = Array.from(allDoctorsSet).sort();
+
+                // Populate Form Therapist Dropdown and Filter Dropdown
+                let doctorFormHtml = '<option value="">Select Doctor/Therapist</option>';
                 let doctorFilterHtml = '<option value="">All Doctors</option>';
-                Object.keys(groupedApts).sort().forEach(doc => {
+                finalDoctorsList.forEach(doc => {
+                    doctorFormHtml += `<option value="${doc}">Dr. ${doc}</option>`;
                     doctorFilterHtml += `<option value="${doc.toLowerCase()}">Dr. ${doc}</option>`;
                 });
+                document.getElementById('aptFormTherapist').innerHTML = doctorFormHtml;
                 document.getElementById('filterTherapist').innerHTML = doctorFilterHtml;
+
+                // EMPTY STATE CHECK - If no appointments found in the system entirely
+                if (aptsList.length === 0) {
+                    tableBody.innerHTML = '<tr id="empty-state-row" class="no-filter"><td colspan="7" style="text-align:center; padding: 30px; color: var(--text-muted);">No appointments found in the database.</td></tr>';
+                    window.renderTimesheet([], finalDoctorsList);
+                    return;
+                }
 
                 Object.keys(groupedApts).sort().forEach(therapist => {
                     const thRow = document.createElement('tr');
@@ -598,16 +530,28 @@
                     });
                 });
 
-                window.renderTimesheet(todayApts, Object.keys(groupedApts).sort());
+                window.renderTimesheet(todayApts, finalDoctorsList);
                 window.setFilterToday();
-            } catch (error) { console.error(error); }
+            } catch (error) { 
+                console.error(error); 
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px; color: var(--danger);">Error loading data.</td></tr>';
+            }
         };
 
         // --- TIMESHEET GENERATOR ---
         window.renderTimesheet = function(todayApts, doctors) {
             let html = '<table class="timesheet-table"><thead><tr><th>Doctor</th>';
-            for(let i=7; i<=19; i++) { html += `<th>${i > 12 ? i-12 : i}${i >= 12 ? 'PM' : 'AM'}</th>`; }
+            for(let i=7; i<=19; i++) { 
+                let hourFormat = i > 12 ? i-12 : i;
+                if(i === 12) hourFormat = 12;
+                let ampm = i >= 12 ? 'PM' : 'AM';
+                html += `<th>${hourFormat} ${ampm}</th>`; 
+            }
             html += '</tr></thead><tbody>';
+            
+            if(doctors.length === 0) {
+                html += '<tr><td colspan="14" style="padding:16px;">No doctors available.</td></tr>';
+            }
 
             doctors.forEach(doc => {
                 html += `<tr><td class="ts-doctor">Dr. ${doc}</td>`;
@@ -636,8 +580,11 @@
             const trs = document.getElementById("aptTableBody").getElementsByTagName("tr");
             let currentTherapistHeader = null;
             let visibleInGroup = 0;
+            let totalVisibleDataRows = 0;
 
             for (let i = 0; i < trs.length; i++) {
+                if (trs[i].id === "empty-state-row") continue; // Skip the empty state row
+
                 if (trs[i].classList.contains('therapist-group-header')) {
                     if (currentTherapistHeader && visibleInGroup === 0) currentTherapistHeader.style.display = "none";
                     currentTherapistHeader = trs[i];
@@ -670,10 +617,32 @@
 
                 if (st === 'completed' && bal <= 0 && sStatus === "" && !sText) show = false; 
 
-                if(show) { trs[i].style.display = ""; visibleInGroup++; } 
-                else { trs[i].style.display = "none"; }
+                if(show) { 
+                    trs[i].style.display = ""; 
+                    visibleInGroup++; 
+                    totalVisibleDataRows++; 
+                } else { 
+                    trs[i].style.display = "none"; 
+                }
             }
             if (currentTherapistHeader && visibleInGroup === 0) currentTherapistHeader.style.display = "none";
+
+            // Process Empty State Display
+            let emptyRow = document.getElementById("empty-state-row");
+            if (totalVisibleDataRows === 0) {
+                if (!emptyRow) {
+                    const tbody = document.getElementById("aptTableBody");
+                    emptyRow = document.createElement("tr");
+                    emptyRow.id = "empty-state-row";
+                    emptyRow.className = "no-filter";
+                    emptyRow.innerHTML = `<td colspan="7" style="text-align:center; padding: 30px; color: var(--text-muted);">No appointments found matching your filters. Try clearing filters or adjusting dates.</td>`;
+                    tbody.appendChild(emptyRow);
+                } else {
+                    emptyRow.style.display = "";
+                }
+            } else if (emptyRow) {
+                emptyRow.style.display = "none";
+            }
         }
 
         window.clearFilters = function() {
@@ -682,7 +651,12 @@
             document.getElementById("filterTherapist").value = "";
             document.getElementById("filterCategory").value = "";
             if(document.getElementById("filterBranch")) document.getElementById("filterBranch").value = "";
-            window.setFilterToday();
+            
+            // THE FIX: Clear the dates to allow the user to see ALL records across ALL days
+            document.getElementById("filterDateFrom").value = "";
+            document.getElementById("filterDateTo").value = "";
+            
+            window.filterTable();
         }
 
         // --- BULK COPY AND BULK DELETE ---
@@ -855,24 +829,12 @@
             win.document.close();
         };
 
-        // Form Submit
+        // Form Submit & Validaion
         window.calcBalance = function() {
             const fee = parseFloat(document.getElementById('aptFee').value) || 0;
             const adv = parseFloat(document.getElementById('aptAdvance').value) || 0;
             const prev = parseFloat(document.getElementById('aptPrevDues').value) || 0;
             document.getElementById('aptBalance').value = (fee + prev - adv).toFixed(2);
-        }
-
-        window.resetAptForm = function() {
-            document.getElementById('add-appointment-form').reset();
-            document.getElementById('aptDocId').value = ''; 
-            document.getElementById('saveAptBtn').innerText = "Save Appointment";
-            document.getElementById('aptCategory').value = "Normal";
-            
-            // Set min date to today to prevent past dates from being picked in the UI
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('aptDate').setAttribute('min', today);
-            document.getElementById('aptRescheduleDate').setAttribute('min', today);
         }
 
         function isPastDateTime(dateStr, timeStr) {
@@ -882,7 +844,18 @@
             return target < now;
         }
 
-        // --- VERIFY & AUTO-ADD NEW PATIENT LOGIC ---
+        window.resetAptForm = function() {
+            document.getElementById('add-appointment-form').reset();
+            document.getElementById('aptDocId').value = ''; 
+            document.getElementById('saveAptBtn').innerText = "Save Appointment";
+            document.getElementById('aptCategory').value = "Normal";
+            
+            // Fix: Set min date to prevent Past date booking on UI
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('aptDate').setAttribute('min', today);
+            document.getElementById('aptRescheduleDate').setAttribute('min', today);
+        }
+
         window.verifyPatientMobile = async function() {
             const mobile = document.getElementById('aptMobile').value;
             const btn = document.getElementById('verifyAptBtn');
@@ -891,7 +864,6 @@
             btn.innerText = "Checking...";
             
             try {
-                // Fetch Patient Data
                 const pSnap = await getDocs(query(collection(db, "patients"), where("mobile", "==", mobile)));
                 if (!pSnap.empty) {
                     const pData = pSnap.docs[0].data();
@@ -902,7 +874,6 @@
                     document.getElementById('aptPatientNotes').value = pData.notes || '';
                     alert("Existing Patient Found! Details have been auto-filled.");
                 } else {
-                    // Reset fields for a new patient
                     document.getElementById('aptName').value = '';
                     document.getElementById('aptAge').value = '';
                     document.getElementById('aptCategory').value = 'Normal';
@@ -911,15 +882,12 @@
                     alert("Patient Not Found. Please fill in the patient details. They will be added as a New Patient automatically when you save the appointment.");
                 }
 
-                // Calculate OP Balance
                 let opBalance = 0;
                 const currentDocId = document.getElementById('aptDocId').value;
                 const aptsSnap = await getDocs(query(collection(db, "appointments"), where("mobile", "==", mobile)));
                 
                 aptsSnap.forEach(doc => {
-                    if (doc.id !== currentDocId) {
-                        opBalance += parseFloat(doc.data().balance) || 0;
-                    }
+                    if (doc.id !== currentDocId) opBalance += parseFloat(doc.data().balance) || 0;
                 });
                 
                 document.getElementById('aptPrevDues').value = opBalance.toFixed(2);
@@ -954,7 +922,7 @@
 
             const docId = document.getElementById('aptDocId').value;
 
-            // Validate Past Bookings
+            // Fix: Validate Past Bookings
             if(!docId && isPastDateTime(payload.date, payload.time)) {
                 return alert("Booking Error: You cannot schedule an appointment for a date or time that has already passed.");
             }
@@ -1030,7 +998,6 @@
         window.onload = () => {
             window.resetAptForm();
             window.loadBranchesForApt();
-            window.loadTherapistsForApt();
             window.loadAppointments();
         }
     </script>
