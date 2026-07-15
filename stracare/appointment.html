@@ -172,16 +172,12 @@
                 </div>
                 <div>
                     <label class="form-label">Status *</label>
-                    <select id="aptStatus" class="form-input" onchange="window.toggleReschedule(this)" required>
+                    <select id="aptStatus" class="form-input" required>
                         <option value="Pending">Pending</option>
                         <option value="Reported">Reported</option>
                         <option value="Completed">Completed</option>
                         <option value="Rescheduled">Rescheduled</option>
                     </select>
-                </div>
-                <div id="reschedule-container" style="display:none;">
-                    <label class="form-label" style="color: var(--danger);">Pick New Reschedule Date</label>
-                    <input type="date" id="aptRescheduleDate" class="form-input" style="border-color: var(--danger);">
                 </div>
                 <div style="grid-column: 1 / -1;">
                     <label class="form-label">Administrative Notes</label>
@@ -209,7 +205,7 @@
             </div>
 
             <div style="text-align: right; margin-top: 24px;">
-                <button type="button" class="btn-outline" style="margin-right: 12px;" onclick="window.resetAptForm()">Clear Form</button>
+                <button type="button" class="btn-outline" style="margin-right: 12px;" onclick="window.resetAptForm()">Clear</button>
                 <button type="button" class="btn-primary" id="saveAptBtn" onclick="window.saveAppointment()">Save Schedule</button>
             </div>
         </form>
@@ -327,7 +323,7 @@
         window.appointmentsDataCache = {};
         window.allBranchesString = "";
         
-        // Mock current user object (Replace with your actual Firebase Auth object)
+        // Mock current user object (Replace with your actual Firebase Auth/Local Storage object)
         window.currentUser = window.currentUser || { role: 'admin', branch: 'Main' };
 
         // --- SAFE DYNAMIC LOADERS (Branches & Doctors) ---
@@ -335,17 +331,22 @@
             const branchSelect = document.getElementById('aptBranch');
             const filterSelect = document.getElementById('filterBranch');
             
+            // User Role Validation
             if (window.currentUser && window.currentUser.role !== 'admin') {
                 const userBranch = window.currentUser.branch;
                 branchSelect.innerHTML = `<option value="${userBranch}">${userBranch}</option>`;
                 filterSelect.innerHTML = `<option value="${userBranch}">${userBranch}</option>`;
+                
+                // Lock fields
                 branchSelect.style.pointerEvents = 'none';
                 branchSelect.style.background = 'var(--grey-med)';
-                filterSelect.style.display = 'none'; 
+                filterSelect.style.display = 'none'; // Hide branch filter entirely for staff
+                
                 window.allBranchesString = userBranch;
                 return; 
             }
 
+            // Admin flow
             filterSelect.style.display = 'block'; 
             try {
                 const snap = await getDocs(collection(db, "branches"));
@@ -392,15 +393,6 @@
             el.classList.toggle('active');
         }
 
-        window.toggleReschedule = function(select) {
-            const container = document.getElementById('reschedule-container');
-            if (select.value === 'Rescheduled') container.style.display = 'block';
-            else {
-                container.style.display = 'none';
-                document.getElementById('aptRescheduleDate').value = '';
-            }
-        }
-
         window.toggleTimesheet = function() {
             window.toggleSection('timesheetCard');
             const card = document.getElementById('timesheetCard');
@@ -428,6 +420,7 @@
             tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px;">Loading data...</td></tr>';
             try {
                 let q;
+                // Enforce Branch Query via Role
                 if (window.currentUser && window.currentUser.role !== 'admin') {
                     q = query(collection(db, "appointments"), where("branch", "==", window.currentUser.branch));
                 } else {
@@ -451,6 +444,7 @@
                 const today = new Date().toISOString().split('T')[0];
                 let todayApts = [];
                 
+                // Populate Doctor Filter Dropdown
                 let doctorFilterHtml = '<option value="">All Doctors</option>';
                 Object.keys(groupedApts).sort().forEach(doc => {
                     doctorFilterHtml += `<option value="${doc.toLowerCase()}">Dr. ${doc}</option>`;
@@ -469,7 +463,7 @@
                         const docId = item.id; 
                         window.appointmentsDataCache[docId] = data;
                         
-                        if(data.date === today) todayApts.push(data);
+                        if(data.date === today) todayApts.push(data); // Gather for timesheet
 
                         let statusBadge = '';
                         if(data.status === 'Completed') statusBadge = '<span class="badge badge-completed">Completed</span>';
@@ -594,6 +588,7 @@
                 if (sBranch && rowBranch !== sBranch) show = false;
                 if (sText && txt.indexOf(sText) === -1) show = false;
 
+                // Hide completed tasks UNLESS they have pending balance, or explicitly filtering
                 if (st === 'completed' && bal <= 0 && sStatus === "" && !sText) show = false; 
 
                 if(show) { trs[i].style.display = ""; visibleInGroup++; } 
@@ -644,6 +639,7 @@
         }
 
         window.executeBulkDelete = async function() {
+            // Validate Admin Role
             if (window.currentUser && window.currentUser.role !== 'admin') {
                 return alert("Only Administrators can perform bulk deletions.");
             }
@@ -674,7 +670,7 @@
             } catch(e) { alert("Failed to perform bulk delete."); }
         }
 
-        // --- INVOICE PRINTING LOGIC ---
+        // --- INVOICE PRINTING LOGIC (WITH DETAILED BILLING HEADER) ---
         window.printInvoice = function(name, mobile, indDate, branch, fee, advance, balance, prevDues) {
             fee = parseFloat(fee) || 0; advance = parseFloat(advance) || 0;
             balance = parseFloat(balance) || 0; prevDues = parseFloat(prevDues) || 0;
@@ -794,65 +790,6 @@
             document.getElementById('aptDocId').value = ''; 
             document.getElementById('saveAptBtn').innerText = "Save Appointment";
             document.getElementById('aptCategory').value = "Normal";
-            
-            // Set min date to today to prevent past dates from being picked in the UI
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('aptDate').setAttribute('min', today);
-            document.getElementById('aptRescheduleDate').setAttribute('min', today);
-        }
-
-        function isPastDateTime(dateStr, timeStr) {
-            if(!dateStr) return false;
-            const target = new Date(dateStr + 'T' + (timeStr || '00:00'));
-            const now = new Date();
-            return target < now;
-        }
-
-        // --- VERIFY & AUTO-ADD NEW PATIENT LOGIC ---
-        window.verifyPatientMobile = async function() {
-            const mobile = document.getElementById('aptMobile').value;
-            const btn = document.getElementById('verifyAptBtn');
-
-            if (mobile.length !== 10) return alert("Enter a valid 10-digit mobile number first.");
-            btn.innerText = "Checking...";
-            
-            try {
-                // Fetch Patient Data
-                const pSnap = await getDocs(query(collection(db, "patients"), where("mobile", "==", mobile)));
-                if (!pSnap.empty) {
-                    const pData = pSnap.docs[0].data();
-                    document.getElementById('aptName').value = pData.name || '';
-                    document.getElementById('aptAge').value = pData.age || '';
-                    document.getElementById('aptCategory').value = pData.category || 'Normal';
-                    document.getElementById('aptLocation').value = pData.location || '';
-                    document.getElementById('aptPatientNotes').value = pData.notes || '';
-                    alert("Existing Patient Found! Details have been auto-filled.");
-                } else {
-                    // Reset fields for a new patient
-                    document.getElementById('aptName').value = '';
-                    document.getElementById('aptAge').value = '';
-                    document.getElementById('aptCategory').value = 'Normal';
-                    document.getElementById('aptLocation').value = '';
-                    document.getElementById('aptPatientNotes').value = '';
-                    alert("Patient Not Found. Please fill in the patient details. They will be added as a New Patient automatically when you save the appointment.");
-                }
-
-                // Calculate OP Balance
-                let opBalance = 0;
-                const currentDocId = document.getElementById('aptDocId').value;
-                const aptsSnap = await getDocs(query(collection(db, "appointments"), where("mobile", "==", mobile)));
-                
-                aptsSnap.forEach(doc => {
-                    if (doc.id !== currentDocId) {
-                        opBalance += parseFloat(doc.data().balance) || 0;
-                    }
-                });
-                
-                document.getElementById('aptPrevDues').value = opBalance.toFixed(2);
-                window.calcBalance();
-
-            } catch(e) { console.error("Error verifying patient:", e); }
-            btn.innerText = "Check";
         }
 
         window.saveAppointment = async function() {
@@ -873,46 +810,10 @@
                 patientNotes: document.getElementById('aptPatientNotes').value,
                 location: document.getElementById('aptLocation').value
             };
-            
-            if(!payload.name || !payload.mobile || !payload.date || !payload.time) {
-                return alert("Please fill in all required (*) fields.");
-            }
-
-            const docId = document.getElementById('aptDocId').value;
-
-            // Validate Past Bookings
-            if(!docId && isPastDateTime(payload.date, payload.time)) {
-                return alert("Booking Error: You cannot schedule an appointment for a date or time that has already passed.");
-            }
-
-            const rescheduleDate = document.getElementById('aptRescheduleDate').value;
-            if(payload.status === 'Rescheduled' && isPastDateTime(rescheduleDate, payload.time)) {
-                return alert("Reschedule Error: You cannot move the appointment to a past date.");
-            }
-
-            if (payload.status === 'Rescheduled') {
-                if(!rescheduleDate) return alert("Please pick a new reschedule date.");
-                payload.date = rescheduleDate; 
-                let cleanNotes = payload.notes.replace(/\[Moved from: .*?\]/g, '').trim();
-                payload.notes = (cleanNotes ? cleanNotes + '\n' : '') + `[Moved from: ${window.formatIndianDate(document.getElementById('aptDate').value)}]`; 
-            }
+            if(!payload.name || !payload.mobile || !payload.date) return alert("Fill required fields");
             
             try {
-                // Auto-Add New Patient if Mobile doesn't exist
-                const pSnap = await getDocs(query(collection(db, "patients"), where("mobile", "==", payload.mobile)));
-                if (pSnap.empty) {
-                    await addDoc(collection(db, "patients"), { 
-                        mobile: payload.mobile, 
-                        name: payload.name, 
-                        age: payload.age,
-                        category: payload.category,
-                        location: payload.location,
-                        notes: payload.patientNotes,
-                        branch: payload.branch, 
-                        createdAt: new Date() 
-                    });
-                }
-                
+                const docId = document.getElementById('aptDocId').value;
                 if(docId) {
                     payload.updatedAt = new Date();
                     await updateDoc(doc(db, "appointments", docId), payload);
@@ -921,7 +822,7 @@
                     await addDoc(collection(db, "appointments"), payload);
                 }
                 
-                alert("Appointment Saved Successfully!");
+                alert("Saved Successfully!");
                 window.resetAptForm();
                 document.getElementById('aptFormCard').classList.remove('active');
                 window.loadAppointments();
@@ -947,14 +848,12 @@
             document.getElementById('aptAdvance').value = data.advance || '';
             
             window.calcBalance();
-            window.toggleReschedule(document.getElementById('aptStatus'));
             document.getElementById('saveAptBtn').innerText = "Update Appointment";
             document.getElementById('aptFormCard').classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         window.onload = () => {
-            window.resetAptForm();
             window.loadBranchesForApt();
             window.loadTherapistsForApt();
             window.loadAppointments();
