@@ -55,17 +55,21 @@
             box-shadow: 0 10px 25px -5px rgba(0, 82, 204, 0.15);
         }
 
-        /* Splash Screen Fade Out Class */
+        /* Splash Screen Transitions */
+        #splash-screen {
+            transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+        }
         .fade-out {
-            opacity: 0;
-            pointer-events: none;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
     </style>
 </head>
 <body class="bg-white text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-100 selection:text-brand-700 bg-crossed-pattern">
 
-    <div id="splash-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-white to-gray-200 transition-opacity duration-700 ease-in-out">
-        <img src="assets/name.png" alt="CMB Business Flow" class="w-48 h-16 object-contain aspect-[3/1] animate-pulse" onerror="this.src='https://via.placeholder.com/150x50?text=CMB+LOGO'">
+    <div id="splash-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-white to-gray-200">
+        <img src="assets/logo.png" alt="CMB Business Flow" class="w-48 h-16 object-contain aspect-[3/1] animate-pulse" onerror="this.src='https://via.placeholder.com/150x50?text=CMB+LOGO'">
         <div class="mt-6 flex gap-1">
             <div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce" style="animation-delay: 0s;"></div>
             <div class="w-2 h-2 bg-brand-600 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
@@ -156,18 +160,31 @@
     </footer>
 
     <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
-
-        // Splash Screen Logic
-        window.addEventListener('load', () => {
+        // 1. BULLETPROOF SPLASH SCREEN LOGIC
+        const removeSplash = () => {
             const splash = document.getElementById('splash-screen');
-            // Wait 1.5 seconds so the user can see the splash screen, then fade out
-            setTimeout(() => {
+            if (splash && !splash.classList.contains('fade-out')) {
                 splash.classList.add('fade-out');
-                // Remove from DOM after fade transition completes
-                setTimeout(() => splash.remove(), 700); 
-            }, 1500); 
+                setTimeout(() => splash.remove(), 600); // Remove from DOM after transition
+            }
+        };
+
+        // Attempt to remove splash slightly after all resources load naturally
+        window.addEventListener('load', () => {
+            setTimeout(removeSplash, 1200); 
+        });
+
+        // FAIL-SAFE: If the network is slow or an image breaks, FORCE remove it after 2.5 seconds
+        setTimeout(removeSplash, 2500);
+
+
+        // 2. SAFE ICON INITIALIZATION
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                lucide.createIcons();
+            } catch (error) {
+                console.warn("Icons could not be loaded.", error);
+            }
         });
     </script>
 </body>
