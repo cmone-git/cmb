@@ -110,50 +110,7 @@
     </style>
 </head>
 <body>
-
-    <!-- Login Screen -->
-    <div id="login-container" style="display: flex; flex-direction: column; height: 100vh; width: 100vw; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; position: fixed; top: 0; left: 0; padding: 20px;">
-        <div style="background: var(--surface); padding: 40px; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); width: 100%; max-width: 400px; text-align: center;">
-            <h2 style="color: var(--text-main); margin-bottom: 24px; font-weight: 800; line-height: 1.3;">Welcome Back<br><span style="color: var(--primary); font-size: 18px;">Stra Care Administration</span></h2>
-            
-            <input type="text" id="loginUsername" placeholder="Username (e.g., admin, userB1)" style="width: 100%; padding: 14px; margin-bottom: 16px; border-radius: 8px; border: 1px solid var(--border); font-size: 14px; outline: none; background: #FAFAFA;">
-            
-            <div style="position: relative; margin-bottom: 16px;">
-                <input type="password" id="loginPassword" placeholder="Password" style="width: 100%; padding: 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 14px; outline: none; padding-right: 40px; background: #FAFAFA;" onkeypress="if(event.key === 'Enter') window.handleLogin()">
-                <span class="material-symbols-rounded" onclick="window.togglePassword()" id="togglePassIcon" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); cursor: pointer; user-select: none;">visibility_off</span>
-            </div>
-
-            <div style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 24px; gap: 8px;">
-                <input type="checkbox" id="rememberMe" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary);">
-                <label for="rememberMe" style="font-size: 13px; color: var(--text-muted); cursor: pointer; user-select: none; font-weight: 500;">Remember me on this browser</label>
-            </div>
-
-            <button onclick="window.handleLogin()" style="width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: opacity 0.2s;">Access Dashboard</button>
-            <div id="login-error" style="color: var(--danger); margin-top: 16px; display: none; font-size: 13px;">Invalid credentials!</div>
-        </div>
-
-        <div style="margin-top: 40px; text-align: center;">
-            <img src="assets/name-bizze.png" alt="Powered by bizze" style="max-width: 120px; height: auto; opacity: 0.7;">
-        </div>
-    </div>
-
-    <!-- APP WRAPPER: Hidden by default -->
-    <div id="app-container" style="display: none; height: 100vh; width: 100vw; overflow: hidden;">
-        
-        <div id="sidebar-container"></div>
-
-        <div class="main-wrapper">
-            <div id="header-container"></div>
-
-            <main id="main-content">
-                
-                <div id="view-dashboard" class="view-section active">
-                    
-                    <div id="dash-error-banner" class="dash-error">
-                        <span class="material-symbols-rounded">error</span>
-                        <span id="dash-error-text">Database connection failed.</span>
                     </div>
-
                     <h2 style="font-size: 22px; margin-bottom: 4px; font-weight: 700;">
                         <span style="color: var(--text-main);">Welcome,</span> 
                         <span style="color: var(--primary);">Stra Care</span>
