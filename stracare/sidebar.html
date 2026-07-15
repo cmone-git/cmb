@@ -1,34 +1,90 @@
-<style>
-    /* Wrapper to manage full height and push footer to the bottom */
-    .sidebar-inner-wrapper { display: flex; flex-direction: column; min-height: 100%; }
-    
-    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-    
-    /* Top Logo Styling - Automatically scales the 2000px image down to fit the sidebar */
-    .sidebar-logo { max-width: 160px; height: auto; object-fit: contain; display: block; } 
-    
-    /* The nav menu takes up the remaining space (flex: 1) to push the footer down */
-    .nav-menu { padding: 16px 12px; list-style: none; margin: 0; flex: 1; } 
-    .nav-item { display: flex; align-items: center; padding: 14px 16px; margin-bottom: 6px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; cursor: pointer; }
-    .nav-item:hover { background: var(--bg); color: var(--primary); }
-    .nav-item.active { background: var(--primary-light); color: var(--primary); }
-    .nav-icon { margin-right: 12px; font-size: 22px; }
-    .nav-divider { border-top: 1px solid var(--border); margin: 16px 0; }
-    
-    /* Sidebar Footer Styling */
-    .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FAFAFA; margin-top: auto; }
-    .footer-logo { width: 90px; height: auto; margin-bottom: 6px; object-fit: contain; }
-    .footer-version { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sidebar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"/>
+    <style>
+        :root {
+            --primary: #0062FF; 
+            --primary-light: #eaf1ff;
+            --bg: #F8F9FA;
+            --surface: #ffffff;
+            --text-main: #0a0a0a;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+        }
+        
+        body { margin: 0; font-family: 'Inter', sans-serif; }
 
-    /* Hide close button on desktop */
-    .close-menu-btn { display: none; background: none; border: none; color: var(--text-main); cursor: pointer; }
-    @media (max-width: 768px) { .close-menu-btn { display: block; } }
-</style>
+        /* Wrapper to manage full height */
+        .sidebar-inner-wrapper { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; /* Strictly 100vh for sticky effect */
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            width: 260px;
+        }
+        
+        /* Sticky Header Logo */
+        .sidebar-header { 
+            padding: 24px; 
+            border-bottom: 1px solid var(--border); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            position: sticky; 
+            top: 0; 
+            background: var(--surface); 
+            z-index: 10; 
+        }
+        
+        /* Top Logo Styling */
+        .sidebar-logo { max-width: 160px; height: auto; object-fit: contain; display: block; } 
+        
+        /* Nav menu is now scrollable independently */
+        .nav-menu { 
+            padding: 16px 12px; 
+            list-style: none; 
+            margin: 0; 
+            flex: 1; 
+            overflow-y: auto; /* Allows menu to scroll while logos stay sticky */
+        } 
+        
+        .nav-item { display: flex; align-items: center; padding: 14px 16px; margin-bottom: 6px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; cursor: pointer; }
+        .nav-item:hover { background: var(--bg); color: var(--primary); }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); }
+        .nav-icon { margin-right: 12px; font-size: 22px; }
+        .nav-divider { border-top: 1px solid var(--border); margin: 16px 0; }
+        
+        /* Sticky Sidebar Footer */
+        .sidebar-footer { 
+            padding: 20px 24px; 
+            border-top: 1px solid var(--border); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            background: #FAFAFA; 
+            position: sticky; 
+            bottom: 0; 
+            z-index: 10; 
+        }
+        .footer-logo { width: 90px; height: auto; margin-bottom: 6px; object-fit: contain; }
+        .footer-version { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Hide close button on desktop */
+        .close-menu-btn { display: none; background: none; border: none; color: var(--text-main); cursor: pointer; }
+        @media (max-width: 768px) { .close-menu-btn { display: block; } }
+    </style>
+</head>
+<body>
 
 <div class="sidebar-inner-wrapper">
     
     <div class="sidebar-header">
-        <!-- Replaced "Stra Care" text with Top Logo Image -->
         <img src="assets/name.png" alt="Stra Care" class="sidebar-logo">
         <button onclick="window.toggleMenu()" class="close-menu-btn">
             <span class="material-symbols-rounded">close</span>
@@ -36,7 +92,7 @@
     </div>
 
     <ul class="nav-menu">
-        <li class="nav-item active" onclick="window.switchView('view-dashboard', this)">
+        <li class="nav-item" onclick="window.switchView('view-dashboard', this)">
             <span class="material-symbols-rounded nav-icon">dashboard</span> Dashboard
         </li>
         <li class="nav-item" onclick="window.switchView('view-patients', this)">
@@ -66,6 +122,10 @@
         <li class="nav-item" onclick="window.switchView('view-attendance', this)">
             <span class="material-symbols-rounded nav-icon">how_to_reg</span> Attendance
         </li>
+
+        <li class="nav-item active" onclick="window.location.href='Leave.html'">
+            <span class="material-symbols-rounded nav-icon">event_busy</span> Employee Leave
+        </li>
         
         <div class="nav-divider"></div>
         
@@ -89,10 +149,12 @@
         </li>
     </ul>
 
-    <!-- New Bottom Footer with bizze Logo -->
     <div class="sidebar-footer">
         <img src="assets/name.png" alt="CMB" class="footer-logo">
         <span class="footer-version">App Version 1.0</span>
     </div>
     
 </div>
+
+</body>
+</html>
