@@ -30,7 +30,81 @@
         }
 
         #appointment-module { font-family: 'Inter', sans-serif; width: 100%; max-width: 1200px; margin: 0 auto; padding: 16px;}
-        
+        <script type="module">
+        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = { /* Your Config */ };
+        const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+        const db = getFirestore(app);
+
+        // --- 1. LOGIN & BRANCH PROTECTION ---
+        // REPLACE THIS with your actual app-wide user session management
+        window.currentUser = window.currentUser || { role: 'admin', branch: 'Main' }; 
+
+        window.loadBranchesForApt = async function() {
+            const branchSelect = document.getElementById('aptBranch');
+            const filterSelect = document.getElementById('filterBranch');
+            
+            // Protection Logic
+            if (window.currentUser && window.currentUser.role !== 'admin') {
+                const userBranch = window.currentUser.branch;
+                branchSelect.innerHTML = `<option value="${userBranch}">${userBranch}</option>`;
+                filterSelect.innerHTML = `<option value="${userBranch}">${userBranch}</option>`;
+                
+                branchSelect.style.pointerEvents = 'none';
+                branchSelect.style.background = 'var(--grey-med)';
+                filterSelect.style.display = 'none'; 
+                window.allBranchesString = userBranch;
+                return; 
+            }
+
+            // Admin flow remains as before...
+            try {
+                const snap = await getDocs(collection(db, "branches"));
+                let branchList = [];
+                snap.forEach(doc => { if(doc.data().name) branchList.push(doc.data().name); });
+                branchList.sort();
+                window.allBranchesString = branchList.join(" | ");
+
+                let bHtml = '<option value="">Select Branch</option>';
+                let fHtml = '<option value="">All Branches</option>';
+                branchList.forEach(bName => {
+                    bHtml += `<option value="${bName}">${bName}</option>`;
+                    fHtml += `<option value="${bName}">${bName}</option>`;
+                });
+                branchSelect.innerHTML = bHtml;
+                filterSelect.innerHTML = fHtml;
+            } catch(e) { console.error(e); }
+        };
+
+        // --- 2. DATA FETCHING WITH ROLE PROTECTION ---
+        window.loadAppointments = async function() {
+            const tableBody = document.getElementById('aptTableBody');
+            try {
+                let q;
+                // Enforce Branch Query via Role
+                if (window.currentUser && window.currentUser.role !== 'admin') {
+                    q = query(collection(db, "appointments"), where("branch", "==", window.currentUser.branch));
+                } else {
+                    q = query(collection(db, "appointments"));
+                }
+                
+                const querySnapshot = await getDocs(q);
+                // ... (Continue processing appointments as before)
+            } catch(e) { console.error(e); }
+        };
+
+        // --- Ensure Load on Window Start ---
+        window.onload = () => {
+            window.loadBranchesForApt();
+            window.loadTherapistsForApt();
+            window.loadAppointments();
+            
+            // Initialize Date Picker Restrictions
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('aptDate').setAttribute('min', today);
+        }
         #appointment-module .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
         
         /* Action Bar */
