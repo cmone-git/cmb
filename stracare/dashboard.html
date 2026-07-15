@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<script src="auth.js"></script>
     <script>
         window.onerror = function(message, source, lineno, colno, error) {
             const errDiv = document.getElementById('dash-error-banner');
@@ -278,97 +278,6 @@
     </div> 
     
     <script>
-        // Define your users and their branch access
-        window.appUsers = {
-            "admin": { password: "adminPassword123", role: "admin", branch: "ALL" },
-            "userB1": { password: "passwordB1", role: "user", branch: "Branch 1" },
-            "userB2": { password: "passwordB2", role: "user", branch: "Branch 2" },
-            "userB3": { password: "passwordB3", role: "user", branch: "Branch 3" },
-            "userB4": { password: "passwordB4", role: "user", branch: "Branch 4" },
-            "userB5": { password: "passwordB5", role: "user", branch: "Branch 5" },
-            "userB6": { password: "passwordB6", role: "user", branch: "Branch 6" }
-        };
-
-        window.currentUser = null;
-
-        window.togglePassword = function() {
-            const passInput = document.getElementById('loginPassword');
-            const passIcon = document.getElementById('togglePassIcon');
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                passIcon.innerText = 'visibility';
-            } else {
-                passInput.type = 'password';
-                passIcon.innerText = 'visibility_off';
-            }
-        };
-
-        window.handleLogin = function(isAutoLogin = false) {
-            const userVal = document.getElementById('loginUsername').value.trim();
-            const passVal = document.getElementById('loginPassword').value.trim();
-            const rememberMe = document.getElementById('rememberMe').checked;
-            const errDiv = document.getElementById('login-error');
-
-            if (window.appUsers[userVal] && window.appUsers[userVal].password === passVal) {
-                window.currentUser = window.appUsers[userVal];
-                
-                if (rememberMe) {
-                    localStorage.setItem('straCareUser', userVal);
-                    localStorage.setItem('straCarePass', passVal);
-                    localStorage.setItem('straCareRemember', 'true');
-                } else if (!isAutoLogin) {
-                    localStorage.removeItem('straCareUser');
-                    localStorage.removeItem('straCarePass');
-                    localStorage.setItem('straCareRemember', 'false');
-                }
-
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('app-container').style.display = 'flex';
-                
-                const branchTextElement = document.getElementById('dash-branch-text');
-                if (window.currentUser.role === 'admin') {
-                    branchTextElement.innerText = "Master Access (All Branches)";
-                    branchTextElement.style.color = "var(--primary)";
-                } else {
-                    branchTextElement.innerText = window.currentUser.branch;
-                }
-                
-                if(window.fetchDashboardData) window.fetchDashboardData();
-            } else {
-                if (!isAutoLogin) {
-                    errDiv.style.display = 'block';
-                }
-            }
-        };
-
-        // NEW: Fixed Logout Function included in main script
-        window.handleLogout = function() {
-            window.currentUser = null; // Clear session
-            
-            // Un-check remember me and wipe local storage immediately
-            localStorage.removeItem('straCareUser');
-            localStorage.removeItem('straCarePass');
-            localStorage.setItem('straCareRemember', 'false');
-            document.getElementById('rememberMe').checked = false;
-
-            // Hide App and Show Login
-            document.getElementById('app-container').style.display = 'none';
-            document.getElementById('login-container').style.display = 'flex';
-            document.getElementById('loginPassword').value = ''; 
-        };
-
-        window.checkAutoLogin = function() {
-            const storedUser = localStorage.getItem('straCareUser');
-            const storedPass = localStorage.getItem('straCarePass');
-            const rememberState = localStorage.getItem('straCareRemember');
-
-            if (rememberState === 'true' && storedUser && storedPass) {
-                document.getElementById('loginUsername').value = storedUser;
-                document.getElementById('loginPassword').value = storedPass;
-                document.getElementById('rememberMe').checked = true;
-                window.handleLogin(true); 
-            }
-        };
 
         // Global UI State
         window.allApts = [];
