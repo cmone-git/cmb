@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CMB | Appointments Tracking</title>
+    <title>Appointments | STRACARE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"/>
 </head>
@@ -40,7 +40,7 @@
         .action-bar .btn-danger { background: var(--surface); color: var(--danger); border: 1px solid var(--danger); padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
         .action-bar .btn-danger:hover { background: var(--danger); color: white; }
 
-        /* Form styling (Hidden by default) */
+        /* Form styling */
         #aptFormCard { display: none; background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 24px; animation: fadeIn 0.3s ease;}
         #aptFormCard.active { display: block; }
         
@@ -114,9 +114,11 @@
             
             <div class="input-group three-cols">
                 <div>
-                    <label class="form-label">Patient Mobile *</label>
+                    <label class="form-label">
+                        Patient Mobile * <span id="patientStatusMsg" style="margin-left: 8px; font-weight: 700;"></span>
+                    </label>
                     <div style="display: flex; gap: 8px;">
-                        <input type="tel" id="aptMobile" class="form-input" placeholder="10-digit number" maxlength="10" required>
+                        <input type="tel" id="aptMobile" class="form-input" placeholder="10-digit number" maxlength="10" required oninput="if(this.value.length === 10) window.verifyPatientMobile();">
                         <button type="button" class="btn-primary" id="verifyAptBtn" onclick="window.verifyPatientMobile()" style="padding: 0 16px;">Check</button>
                     </div>
                 </div>
@@ -167,8 +169,8 @@
 
             <div class="input-group three-cols">
                 <div>
-                    <label class="form-label">Head Doctor/Therapist *</label>
-                    <select id="aptFormTherapist" class="form-input" required><option value="">Loading Doctors...</option></select>
+                    <label class="form-label">Staff / Therapist *</label>
+                    <select id="aptFormTherapist" class="form-input" required><option value="">Loading Directory...</option></select>
                 </div>
                 <div>
                     <label class="form-label">Status *</label>
@@ -208,9 +210,15 @@
                 </div>
             </div>
 
-            <div style="text-align: right; margin-top: 24px;">
-                <button type="button" class="btn-outline" style="margin-right: 12px;" onclick="window.resetAptForm()">Clear Form</button>
-                <button type="button" class="btn-primary" id="saveAptBtn" onclick="window.saveAppointment()">Save Schedule</button>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 24px;">
+                <div>
+                    <label class="form-label">Booking Timestamp (System Generated)</label>
+                    <input type="text" id="aptTimestamp" class="form-input" readonly style="background: transparent; border: none; font-weight: 600; color: var(--secondary); padding-left: 0; width: 300px;" value="Will be generated upon save">
+                </div>
+                <div>
+                    <button type="button" class="btn-outline" style="margin-right: 12px;" onclick="window.resetAptForm()">Clear Form</button>
+                    <button type="button" class="btn-primary" id="saveAptBtn" onclick="window.saveAppointment()">Save Schedule</button>
+                </div>
             </div>
         </form>
     </div>
@@ -252,7 +260,7 @@
                 </div>
                 
                 <select id="filterTherapist" class="form-input" onchange="window.filterTable()" style="width: auto; padding: 8px;">
-                    <option value="">All Doctors</option>
+                    <option value="">All Staff/Doctors</option>
                 </select>
 
                 <select id="filterCategory" class="form-input" onchange="window.filterTable()" style="width: auto; padding: 8px;">
@@ -295,7 +303,7 @@
                         <th class="no-print"><input type="checkbox" onclick="window.toggleAllCheckboxes(this)"></th>
                         <th>Date & Time</th>
                         <th>Patient Details</th>
-                        <th>Branch / Doctor</th>
+                        <th>Branch / Staff</th>
                         <th>Financials</th>
                         <th>Status & Notes</th>
                         <th class="no-print" style="text-align: right;">Actions</th>
@@ -326,11 +334,47 @@
         // --- GLOBAL CONTEXT ---
         window.appointmentsDataCache = {};
         window.allBranchesString = "";
+        window.companyProfileCache = null; // Cache to hold company details
         
-        // Mock current user object (Replace with your actual Firebase Auth object or logic)
+        // Ensure user is defined (Replace with actual session data)
         window.currentUser = window.currentUser || { role: 'admin', branch: 'Main' };
 
-        // --- DYNAMIC LOADERS ---
+        // --- DATE & TIME FORMATTERS (Strict 12-Hour Indian Format) ---
+        window.formatIndianDate = function(dateStr) {
+            if(!dateStr) return '';
+            const p = dateStr.split('-');
+            if(p.length !== 3) return dateStr;
+            return `${p[2]}/${p[1]}/${p[0]}`; // DD/MM/YYYY
+        }
+
+        window.format12HourTime = function(timeStr) {
+            if(!timeStr) return '';
+            let [h, m] = timeStr.split(':');
+            h = parseInt(h, 10);
+            let ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            h = h ? h : 12; 
+            let hStr = h < 10 ? '0'+h : h;
+            return `${hStr}:${m} ${ampm}`;
+        }
+
+        window.formatTimestamp = function(isoStr) {
+            if(!isoStr) return 'N/A';
+            const d = new Date(isoStr);
+            if(isNaN(d)) return isoStr;
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            let h = d.getHours();
+            let m = String(d.getMinutes()).padStart(2, '0');
+            let ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            h = h ? h : 12;
+            let hStr = String(h).padStart(2, '0');
+            return `${day}/${month}/${year} ${hStr}:${m} ${ampm}`;
+        }
+
+        // --- SAFE DYNAMIC LOADERS ---
         window.loadBranchesForApt = async function() {
             const branchSelect = document.getElementById('aptBranch');
             const filterSelect = document.getElementById('filterBranch');
@@ -369,50 +413,33 @@
             } catch(e) { console.error("Error loading branches"); }
         };
 
-        window.loadTherapistsForApt = async function() {
-            // Therapist population logic occurs inside loadAppointments to gather both existing and historic doctors
-        };
-
-        // --- UTILS & UI TOGGLES ---
-        window.toggleSection = function(id) {
-            const el = document.getElementById(id);
-            el.classList.toggle('active');
-        }
-
-        window.toggleReschedule = function(select) {
-            const container = document.getElementById('reschedule-container');
-            if (select.value === 'Rescheduled') container.style.display = 'block';
-            else {
-                container.style.display = 'none';
-                document.getElementById('aptRescheduleDate').value = '';
-            }
-        }
-
-        window.toggleTimesheet = function() {
-            window.toggleSection('timesheetCard');
-            const card = document.getElementById('timesheetCard');
-            if(card.classList.contains('active')) window.setFilterToday();
-        }
-
-        window.formatIndianDate = function(dateStr) {
-            if(!dateStr) return '';
-            const p = dateStr.split('-');
-            if(p.length !== 3) return dateStr;
-            return `${p[2]}/${p[1]}/${p[0]}`;
-        }
-
-        window.setFilterToday = function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById("filterDateFrom").value = today;
-            document.getElementById("filterDateTo").value = today;
-            document.getElementById("ts-date-label").innerText = window.formatIndianDate(today);
-            window.filterTable();
+        // Fetch Dynamic Company Profile for Bills
+        window.fetchCompanyProfile = async function() {
+            if (window.companyProfileCache) return window.companyProfileCache;
+            try {
+                const snap = await getDocs(collection(db, "company"));
+                if (!snap.empty) {
+                    window.companyProfileCache = snap.docs[0].data();
+                    return window.companyProfileCache;
+                }
+            } catch (e) { console.error("Error fetching company info:", e); }
+            
+            // Default fallback if no company collection exists yet
+            return {
+                name: "STRA CARE",
+                address: "Stra Care Headquarters, Building No: 123, Healthcare Avenue, Near Main Road, Kerala, India - 670672",
+                phone: "+91 97449 02555 | +91 90612 07871",
+                email: "info@stracares.in",
+                website: "www.stracares.in",
+                gst: "12345ABCD"
+            };
         }
 
         // --- FETCHING DATA ---
         window.loadAppointments = async function() {
             const tableBody = document.getElementById('aptTableBody');
             tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px;">Loading data...</td></tr>';
+            
             try {
                 let q;
                 if (window.currentUser && window.currentUser.role !== 'admin') {
@@ -439,24 +466,36 @@
                     groupedApts[th].push(item);
                 });
 
-                // Get complete list of all therapists (historic + current database list) to build the timesheet properly
-                const tSnap = await getDocs(collection(db, "therapists"));
-                let allDoctorsSet = new Set();
-                tSnap.forEach(d => { if(d.data().name) allDoctorsSet.add(d.data().name); });
-                Object.keys(groupedApts).forEach(d => allDoctorsSet.add(d));
-                const finalDoctorsList = Array.from(allDoctorsSet).sort();
+                // COMBINED THERAPIST AND STAFF DIRECTORY FETCH
+                let allStaff = [];
+                let tQuery = collection(db, "therapists");
+                let sQuery = collection(db, "staff");
+                
+                if (window.currentUser && window.currentUser.role !== 'admin') {
+                    tQuery = query(collection(db, "therapists"), where("branch", "==", window.currentUser.branch));
+                    sQuery = query(collection(db, "staff"), where("branch", "==", window.currentUser.branch));
+                }
 
-                // Populate Form Therapist Dropdown and Filter Dropdown
-                let doctorFormHtml = '<option value="">Select Doctor/Therapist</option>';
-                let doctorFilterHtml = '<option value="">All Doctors</option>';
+                const tSnap = await getDocs(tQuery);
+                tSnap.forEach(doc => allStaff.push(doc.data().name));
+                const sSnap = await getDocs(sQuery);
+                sSnap.forEach(doc => allStaff.push(doc.data().name));
+                
+                // Merge active staff with historic doctors found in appointments
+                let allDoctorsSet = new Set(allStaff);
+                Object.keys(groupedApts).forEach(d => allDoctorsSet.add(d));
+                const finalDoctorsList = Array.from(allDoctorsSet).filter(n => n).sort();
+
+                // Populate Form and Filter Dropdowns
+                let doctorFormHtml = '<option value="">Select Staff / Therapist</option>';
+                let doctorFilterHtml = '<option value="">All Staff / Doctors</option>';
                 finalDoctorsList.forEach(doc => {
-                    doctorFormHtml += `<option value="${doc}">Dr. ${doc}</option>`;
-                    doctorFilterHtml += `<option value="${doc.toLowerCase()}">Dr. ${doc}</option>`;
+                    doctorFormHtml += `<option value="${doc}">${doc}</option>`;
+                    doctorFilterHtml += `<option value="${doc.toLowerCase()}">${doc}</option>`;
                 });
                 document.getElementById('aptFormTherapist').innerHTML = doctorFormHtml;
                 document.getElementById('filterTherapist').innerHTML = doctorFilterHtml;
 
-                // EMPTY STATE CHECK - If no appointments found in the system entirely
                 if (aptsList.length === 0) {
                     tableBody.innerHTML = '<tr id="empty-state-row" class="no-filter"><td colspan="7" style="text-align:center; padding: 30px; color: var(--text-muted);">No appointments found in the database.</td></tr>';
                     window.renderTimesheet([], finalDoctorsList);
@@ -467,7 +506,7 @@
                     const thRow = document.createElement('tr');
                     thRow.className = "therapist-group-header";
                     thRow.setAttribute("data-therapist-group", therapist.toLowerCase());
-                    thRow.innerHTML = `<td colspan="7" style="background: var(--primary-light); padding: 12px 20px;"><strong style="color: var(--primary);">Dr. ${therapist}</strong></td>`;
+                    thRow.innerHTML = `<td colspan="7" style="background: var(--primary-light); padding: 12px 20px;"><strong style="color: var(--primary);"><span class="material-symbols-rounded" style="font-size: 14px; vertical-align: middle;">badge</span> ${therapist}</strong></td>`;
                     tableBody.appendChild(thRow);
 
                     groupedApts[therapist].forEach((item) => {
@@ -484,9 +523,12 @@
                         else statusBadge = '<span class="badge badge-pending">Pending</span>';
 
                         const indDate = window.formatIndianDate(data.date);
+                        const time12hr = window.format12HourTime(data.time);
+                        const bookedOn = data.createdAt ? window.formatTimestamp(data.createdAt) : 'N/A';
+
                         let noteSnippet = data.notes ? `<div style="margin-top: 6px; font-size: 11px; color: var(--secondary); background: #FAFAFA; padding: 4px; border-radius: 4px; line-height: 1.4;">${data.notes}</div>` : '';
                         
-                        const waText = encodeURIComponent(`Hello ${data.name}, your appointment at STRA CARE (${data.branch}) is booked for ${indDate}.`);
+                        const waText = encodeURIComponent(`Hello ${data.name}, your appointment at STRA CARE (${data.branch}) is booked for ${indDate} at ${time12hr}.`);
                         let locLink = data.location ? `<a href="${data.location.startsWith('http') ? data.location : 'http://googleusercontent.com/maps.google.com/?q=' + encodeURIComponent(data.location)}" class="cta-link" target="_blank" title="View Map"><span class="material-symbols-rounded" style="font-size: 16px; color: #3B82F6;">map</span></a>` : '';
 
                         const prevDuesSafe = data.prevDues || 0;
@@ -505,7 +547,11 @@
 
                         tr.innerHTML = `
                             <td class="no-print"><input type="checkbox" class="apt-checkbox" value="${docId}"></td>
-                            <td><strong>${indDate}</strong><br><span style="font-size:12px; color:var(--text-muted);">${data.time}</span></td>
+                            <td>
+                                <strong>${indDate}</strong><br>
+                                <span style="font-size:12px; color:var(--text-main); font-weight:600;">${time12hr}</span><br>
+                                <span style="font-size:10px; color:var(--text-muted);" title="Booked On">🕒 ${bookedOn}</span>
+                            </td>
                             <td>
                                 <strong>${data.name}</strong> <span style="font-size:11px; color:var(--text-muted);">(${data.age || '--'} Yrs)</span> ${categoryBadge}<br>
                                 <span style="font-size: 12px; color: var(--text-muted);">${data.mobile}</span>
@@ -521,7 +567,7 @@
                             <td class="no-print" style="text-align: right;">
                                 <div style="display:flex; gap: 10px; align-items:center; justify-content: flex-end;">
                                     <span class="material-symbols-rounded" style="color: #8B5CF6; cursor: pointer; font-size: 20px;" title="View Notes" onclick="window.viewNotes('${docId}')">sticky_note_2</span>
-                                    <span class="material-symbols-rounded" style="color: var(--primary); cursor: pointer; font-size: 20px;" title="Print Invoice" onclick="window.printInvoice('${data.name}', '${data.mobile}', '${indDate}', '${data.branch}', '${data.fee}', '${data.advance}', '${data.balance}', '${prevDuesSafe}')">receipt_long</span>
+                                    <span class="material-symbols-rounded" style="color: var(--primary); cursor: pointer; font-size: 20px;" title="Print Invoice" onclick="window.printInvoice('${data.name}', '${data.mobile}', '${indDate}', '${data.time}', '${data.branch}', '${data.fee}', '${data.advance}', '${data.balance}', '${prevDuesSafe}')">receipt_long</span>
                                     <span class="material-symbols-rounded" style="color: var(--text-muted); cursor: pointer; font-size: 20px;" title="Edit" onclick="window.editAppointment('${docId}')">edit</span>
                                 </div>
                             </td>
@@ -538,9 +584,38 @@
             }
         };
 
+        // --- UTILS & UI TOGGLES ---
+        window.toggleSection = function(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('active');
+        }
+
+        window.toggleReschedule = function(select) {
+            const container = document.getElementById('reschedule-container');
+            if (select.value === 'Rescheduled') container.style.display = 'block';
+            else {
+                container.style.display = 'none';
+                document.getElementById('aptRescheduleDate').value = '';
+            }
+        }
+
+        window.toggleTimesheet = function() {
+            window.toggleSection('timesheetCard');
+            const card = document.getElementById('timesheetCard');
+            if(card.classList.contains('active')) window.setFilterToday();
+        }
+
+        window.setFilterToday = function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById("filterDateFrom").value = today;
+            document.getElementById("filterDateTo").value = today;
+            document.getElementById("ts-date-label").innerText = window.formatIndianDate(today);
+            window.filterTable();
+        }
+
         // --- TIMESHEET GENERATOR ---
         window.renderTimesheet = function(todayApts, doctors) {
-            let html = '<table class="timesheet-table"><thead><tr><th>Doctor</th>';
+            let html = '<table class="timesheet-table"><thead><tr><th>Staff / Doctor</th>';
             for(let i=7; i<=19; i++) { 
                 let hourFormat = i > 12 ? i-12 : i;
                 if(i === 12) hourFormat = 12;
@@ -550,15 +625,18 @@
             html += '</tr></thead><tbody>';
             
             if(doctors.length === 0) {
-                html += '<tr><td colspan="14" style="padding:16px;">No doctors available.</td></tr>';
+                html += '<tr><td colspan="14" style="padding:16px;">No schedules available.</td></tr>';
             }
 
             doctors.forEach(doc => {
-                html += `<tr><td class="ts-doctor">Dr. ${doc}</td>`;
+                html += `<tr><td class="ts-doctor">${doc}</td>`;
                 for(let h=7; h<=19; h++) {
                     html += `<td>`;
                     const hourApts = todayApts.filter(a => a.therapist === doc && a.time && parseInt(a.time.split(':')[0]) === h);
-                    hourApts.forEach(a => { html += `<div class="ts-booking" title="${a.name} - ${a.time}">${a.name}</div>`; });
+                    hourApts.forEach(a => { 
+                        let fTime = window.format12HourTime(a.time);
+                        html += `<div class="ts-booking" title="${a.name} - ${fTime}">${a.name}</div>`; 
+                    });
                     html += `</td>`;
                 }
                 html += `</tr>`;
@@ -583,7 +661,7 @@
             let totalVisibleDataRows = 0;
 
             for (let i = 0; i < trs.length; i++) {
-                if (trs[i].id === "empty-state-row") continue; // Skip the empty state row
+                if (trs[i].id === "empty-state-row") continue; 
 
                 if (trs[i].classList.contains('therapist-group-header')) {
                     if (currentTherapistHeader && visibleInGroup === 0) currentTherapistHeader.style.display = "none";
@@ -627,7 +705,6 @@
             }
             if (currentTherapistHeader && visibleInGroup === 0) currentTherapistHeader.style.display = "none";
 
-            // Process Empty State Display
             let emptyRow = document.getElementById("empty-state-row");
             if (totalVisibleDataRows === 0) {
                 if (!emptyRow) {
@@ -652,7 +729,6 @@
             document.getElementById("filterCategory").value = "";
             if(document.getElementById("filterBranch")) document.getElementById("filterBranch").value = "";
             
-            // THE FIX: Clear the dates to allow the user to see ALL records across ALL days
             document.getElementById("filterDateFrom").value = "";
             document.getElementById("filterDateTo").value = "";
             
@@ -682,7 +758,7 @@
                 for (let cb of checkboxes) {
                     const existingData = window.appointmentsDataCache[cb.value];
                     if(!existingData) continue;
-                    const newAppointment = { ...existingData, date: newDate, status: "Pending", createdAt: new Date() };
+                    const newAppointment = { ...existingData, date: newDate, status: "Pending", createdAt: new Date().toISOString() };
                     await addDoc(collection(db, "appointments"), newAppointment);
                 }
                 alert(`Successfully copied ${checkboxes.length} appointments to ${window.formatIndianDate(newDate)}!`);
@@ -722,11 +798,14 @@
             } catch(e) { alert("Failed to perform bulk delete."); }
         }
 
-        // --- INVOICE PRINTING LOGIC ---
-        window.printInvoice = function(name, mobile, indDate, branch, fee, advance, balance, prevDues) {
+        // --- INVOICE PRINTING LOGIC WITH DYNAMIC COMPANY DETAILS ---
+        window.printInvoice = async function(name, mobile, indDate, timeStr, branch, fee, advance, balance, prevDues) {
             fee = parseFloat(fee) || 0; advance = parseFloat(advance) || 0;
             balance = parseFloat(balance) || 0; prevDues = parseFloat(prevDues) || 0;
             const netBalance = fee + prevDues - advance;
+            
+            const time12hr = window.format12HourTime(timeStr);
+            const comp = await window.fetchCompanyProfile();
 
             const invoiceWindow = window.open('', '_blank');
             invoiceWindow.document.write(`
@@ -749,19 +828,17 @@
                 </head>
                 <body>
                     <div class="header-row">
-                        <div>
-                            <h1 style="color: #0062FF; margin:0 0 8px 0;">STRA CARE</h1>
+                        <div style="max-width: 50%;">
+                            <h1 style="color: #0062FF; margin:0 0 8px 0; text-transform: uppercase;">${comp.name}</h1>
                             <div style="font-size: 13px; color: #555;">
-                                <strong>Clinic Address:</strong><br>
-                                Stra Care Headquarters<br>
-                                Building No: 123, Healthcare Avenue<br>
-                                Near Main Road, Kerala, India - 670672<br>
-                                Registration No: 12345ABCD
+                                <strong>Registered Address:</strong><br>
+                                ${comp.address.replace(/,/g, '<br>')}<br>
+                                ${comp.gst ? `Registration/GST No: ${comp.gst}` : ''}
                             </div>
                         </div>
                         <div class="company-info">
-                            <strong>+91 97449 02555 | +91 90612 07871</strong><br>
-                            info@stracares.in | www.stracares.in<br><br>
+                            <strong>${comp.phone}</strong><br>
+                            ${comp.email} | ${comp.website}<br><br>
                             <strong>Serving Branch:</strong> <span style="color: #0062FF; font-weight: 700;">${branch.toUpperCase()}</span>
                         </div>
                     </div>
@@ -773,7 +850,7 @@
                             <div style="color: #555;">Mobile: +91 ${mobile}</div>
                         </div>
                         <div style="text-align:right;">
-                            <div style="margin-bottom: 4px;"><strong>Invoice Date:</strong> ${indDate}</div>
+                            <div style="margin-bottom: 4px;"><strong>Invoice Date:</strong> ${indDate} &nbsp; ${time12hr}</div>
                             <div style="color: #555;"><strong>Service Type:</strong> Clinical Consultation / Therapy</div>
                         </div>
                     </div>
@@ -792,7 +869,7 @@
                     
                     <div class="bank-details">
                         <h4 style="margin: 0 0 8px 0; color: #0062FF;">Bank Details for Payment Remittance</h4>
-                        <strong>Account Name:</strong> STRA CARE | <strong>Account No:</strong> 50200120597389<br>
+                        <strong>Account Name:</strong> ${comp.name} | <strong>Account No:</strong> 50200120597389<br>
                         <strong>IFSC Code:</strong> HDFC0000465 | <strong>Bank:</strong> HDFC Bank<br>
                         <strong>UPI ID:</strong> 9744902555@hdfc
                     </div>
@@ -829,7 +906,7 @@
             win.document.close();
         };
 
-        // Form Submit & Validaion
+        // --- FORM SUBMIT & NO-ALERT PATIENT CHECK ---
         window.calcBalance = function() {
             const fee = parseFloat(document.getElementById('aptFee').value) || 0;
             const adv = parseFloat(document.getElementById('aptAdvance').value) || 0;
@@ -847,10 +924,11 @@
         window.resetAptForm = function() {
             document.getElementById('add-appointment-form').reset();
             document.getElementById('aptDocId').value = ''; 
-            document.getElementById('saveAptBtn').innerText = "Save Appointment";
+            document.getElementById('saveAptBtn').innerText = "Save Schedule";
             document.getElementById('aptCategory').value = "Normal";
+            document.getElementById('patientStatusMsg').innerHTML = ""; 
+            document.getElementById('aptTimestamp').value = "Will be generated upon save";
             
-            // Fix: Set min date to prevent Past date booking on UI
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('aptDate').setAttribute('min', today);
             document.getElementById('aptRescheduleDate').setAttribute('min', today);
@@ -858,10 +936,14 @@
 
         window.verifyPatientMobile = async function() {
             const mobile = document.getElementById('aptMobile').value;
-            const btn = document.getElementById('verifyAptBtn');
+            const statusMsg = document.getElementById('patientStatusMsg');
 
-            if (mobile.length !== 10) return alert("Enter a valid 10-digit mobile number first.");
-            btn.innerText = "Checking...";
+            if (mobile.length !== 10) {
+                statusMsg.innerHTML = '<span style="color:var(--danger)">Invalid 10-digit number</span>';
+                return;
+            }
+            
+            statusMsg.innerHTML = '<span style="color:var(--text-muted)">Checking...</span>';
             
             try {
                 const pSnap = await getDocs(query(collection(db, "patients"), where("mobile", "==", mobile)));
@@ -872,14 +954,16 @@
                     document.getElementById('aptCategory').value = pData.category || 'Normal';
                     document.getElementById('aptLocation').value = pData.location || '';
                     document.getElementById('aptPatientNotes').value = pData.notes || '';
-                    alert("Existing Patient Found! Details have been auto-filled.");
+                    
+                    statusMsg.innerHTML = '<span style="color:var(--success)">Existing Patient</span>';
                 } else {
                     document.getElementById('aptName').value = '';
                     document.getElementById('aptAge').value = '';
                     document.getElementById('aptCategory').value = 'Normal';
                     document.getElementById('aptLocation').value = '';
                     document.getElementById('aptPatientNotes').value = '';
-                    alert("Patient Not Found. Please fill in the patient details. They will be added as a New Patient automatically when you save the appointment.");
+                    
+                    statusMsg.innerHTML = '<span style="color:var(--warning)">New Patient</span>';
                 }
 
                 let opBalance = 0;
@@ -893,8 +977,9 @@
                 document.getElementById('aptPrevDues').value = opBalance.toFixed(2);
                 window.calcBalance();
 
-            } catch(e) { console.error("Error verifying patient:", e); }
-            btn.innerText = "Check";
+            } catch(e) { 
+                statusMsg.innerHTML = '<span style="color:var(--danger)">Database Error</span>';
+            }
         }
 
         window.saveAppointment = async function() {
@@ -922,7 +1007,6 @@
 
             const docId = document.getElementById('aptDocId').value;
 
-            // Fix: Validate Past Bookings
             if(!docId && isPastDateTime(payload.date, payload.time)) {
                 return alert("Booking Error: You cannot schedule an appointment for a date or time that has already passed.");
             }
@@ -940,7 +1024,6 @@
             }
             
             try {
-                // Auto-Add New Patient if Mobile doesn't exist
                 const pSnap = await getDocs(query(collection(db, "patients"), where("mobile", "==", payload.mobile)));
                 if (pSnap.empty) {
                     await addDoc(collection(db, "patients"), { 
@@ -951,15 +1034,15 @@
                         location: payload.location,
                         notes: payload.patientNotes,
                         branch: payload.branch, 
-                        createdAt: new Date() 
+                        createdAt: new Date().toISOString()
                     });
                 }
                 
                 if(docId) {
-                    payload.updatedAt = new Date();
+                    payload.updatedAt = new Date().toISOString();
                     await updateDoc(doc(db, "appointments", docId), payload);
                 } else {
-                    payload.createdAt = new Date();
+                    payload.createdAt = new Date().toISOString();
                     await addDoc(collection(db, "appointments"), payload);
                 }
                 
@@ -988,6 +1071,9 @@
             document.getElementById('aptFee').value = data.fee || '';
             document.getElementById('aptAdvance').value = data.advance || '';
             
+            document.getElementById('aptTimestamp').value = data.createdAt ? window.formatTimestamp(data.createdAt) : 'N/A';
+            document.getElementById('patientStatusMsg').innerHTML = ''; 
+            
             window.calcBalance();
             window.toggleReschedule(document.getElementById('aptStatus'));
             document.getElementById('saveAptBtn').innerText = "Update Appointment";
@@ -996,9 +1082,10 @@
         }
 
         window.onload = () => {
+            window.fetchCompanyProfile(); // Pre-fetch company details
             window.resetAptForm();
             window.loadBranchesForApt();
-            window.loadAppointments();
+            window.loadAppointments(); 
         }
     </script>
 </div>
