@@ -2,204 +2,251 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Login | CMB The Business Flow App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMB | Customise & Manage your Business Work Flows</title>
     
-    <meta name="theme-color" content="#D60000">
-    <meta name="description" content="CMB - Cloud ERP & CRM for Growing Business">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="assets/logo.png">
-    
-    <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="apple-touch-icon" href="assets/logo.png">
+    <link rel="apple-touch-startup-image" href="assets/logo-name.png">
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
     <script>
         tailwind.config = {
-            theme: { 
-                extend: { 
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }, 
-                    colors: { 
-                        brand: { 
-                            50: '#fef2f2', 
-                            100: '#fee2e2', 
-                            500: '#ef4444', 
-                            600: '#D60000', /* Primary Corporate Red */
-                            700: '#ba0000'  /* Darker Corporate Red for hover states */
-                        } 
-                    } 
-                } 
-            }
-        }
-    </script>
-    
-    <style>
-        /* Crossed light grey background with subtle dot pattern for the left side */
-        .bg-crossed-pattern {
-            background: linear-gradient(135deg, #f9fafb 50%, #f3f4f6 50%);
-            position: relative;
-        }
-        .bg-crossed-pattern::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: radial-gradient(#e5e7eb 1.5px, transparent 1.5px);
-            background-size: 24px 24px;
-            opacity: 0.6;
-            pointer-events: none;
-        }
-    </style>
-</head>
-<body class="bg-white text-slate-800 font-sans antialiased min-h-screen flex flex-col md:flex-row selection:bg-brand-100 selection:text-brand-700">
-
-    <div class="w-full md:w-5/12 lg:w-1/2 bg-crossed-pattern border-b md:border-b-0 md:border-r border-slate-200 p-10 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[35vh] md:min-h-screen z-10 relative">
-        
-        <div class="relative z-10 w-full max-w-lg mx-auto md:mx-0 flex flex-col items-center md:items-start">
-            <img src="assets/name.png" alt="CMB Logo" class="h-16 w-48 object-contain mb-10 drop-shadow-sm">
-            
-            <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight mb-4 tracking-tight">
-                The One App to<br/>
-                <span class="text-brand-600">Grow your Business.</span>
-            </h1>
-            
-            <p class="text-lg md:text-xl text-slate-600 font-semibold tracking-wide uppercase">
-                Count . Connect . Grow
-            </p>
-        </div>
-    </div>
-
-    <div class="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center p-6 md:p-12 bg-white flex-grow relative z-20 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.05)] md:shadow-none">
-        
-        <div class="max-w-md w-full bg-white rounded-3xl p-4 sm:p-8">
-            
-            <div class="text-center mb-10">
-                <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Welcome Back</h2>
-                <p class="text-slate-500 text-sm mt-2 font-medium">Sign in to access your CMB dashboard.</p>
-            </div>
-            
-            <form id="loginForm" onsubmit="handleLogin(event)" class="flex flex-col gap-6">
-                
-                <div id="errorMsg" class="hidden bg-red-50 text-red-600 text-sm font-bold p-3.5 rounded-xl border border-red-100 text-center flex items-center justify-center gap-2">
-                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                    Invalid Username or Password.
-                </div>
-
-                <div>
-                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Username</label>
-                    <div class="relative">
-                        <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input type="text" id="username" required placeholder="Enter username" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 transition-all font-medium placeholder-slate-400">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block">Password</label>
-                    <div class="relative">
-                        <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input type="password" id="password" required placeholder="Enter password" class="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-600/10 transition-all font-medium placeholder-slate-400">
-                        <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600 focus:outline-none transition-colors">
-                            <i data-lucide="eye" id="eyeIcon" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between mt-[-4px]">
-                    <label class="flex items-center gap-2.5 cursor-pointer group">
-                        <input type="checkbox" id="remember" class="w-4 h-4 text-brand-600 border-slate-300 rounded focus:ring-brand-500 transition-colors cursor-pointer">
-                        <span class="text-sm text-slate-600 font-medium group-hover:text-slate-900 transition-colors select-none">Remember Password</span>
-                    </label>
-                </div>
-
-                <button type="submit" id="loginBtn" class="mt-2 w-full py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all shadow-[0_4px_14px_0_rgba(214,0,0,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,0,0.23)] hover:-translate-y-0.5 flex justify-center items-center gap-2 text-base">
-                    Sign In <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                </button>
-            </form>
-            
-            <div class="mt-10 pt-6 border-t border-slate-100 text-center">
-                <a href="https://cmfilings.com" target="_blank" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-brand-600 transition-colors">
-                    <i data-lucide="headphones" class="w-4 h-4"></i>
-                    Contact Support
-                </a>
-            </div>
-
-        </div>
-    </div>
-
-    <script>
-        // Initialize Icons
-        lucide.createIcons();
-
-        // Register Service Worker for PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => console.log('ServiceWorker registration successful'))
-                    .catch(err => console.log('ServiceWorker registration failed: ', err));
-            });
-        }
-
-        // Toggle Password Visibility
-        function togglePassword() {
-            const passInput = document.getElementById('password');
-            const eyeIcon = document.getElementById('eyeIcon');
-            
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                eyeIcon.setAttribute('data-lucide', 'eye-off');
-            } else {
-                passInput.type = 'password';
-                eyeIcon.setAttribute('data-lucide', 'eye');
-            }
-            lucide.createIcons(); // Re-render the icon
-        }
-
-        // Authentication Credentials
-        const validUsers = {
-            "admin": "Admin@1111",
-            "staff": "Staff@123"
-        };
-
-        function handleLogin(event) {
-            event.preventDefault();
-            
-            const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value.trim();
-            const remember = document.getElementById('remember').checked;
-            const errorMsg = document.getElementById('errorMsg');
-            const btn = document.getElementById('loginBtn');
-
-            // Set loading state
-            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> Authenticating...`;
-            btn.classList.add('opacity-80', 'cursor-not-allowed');
-            lucide.createIcons();
-
-            setTimeout(() => {
-                // Verify credentials
-                if (validUsers[user] && validUsers[user] === pass) {
-                    
-                    // Handle Auth states locally
-                    localStorage.setItem('cmb_auth', 'true');
-                    localStorage.setItem('cmb_active_user', user);
-                    
-                    if(remember) {
-                        localStorage.setItem('cmb_remember', 'true');
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb', /* Zoho/Brand Blue */
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
                     }
-
-                    // Direct to Dashboard as requested
-                    window.location.href = 'cmb/cmfilings.com/dashboard'; 
-                } else {
-                    // Fail state
-                    errorMsg.classList.remove('hidden');
-                    btn.innerHTML = `Sign In <i data-lucide="arrow-right" class="w-5 h-5"></i>`;
-                    btn.classList.remove('opacity-80', 'cursor-not-allowed');
-                    lucide.createIcons();
                 }
-            }, 800); 
+            }
         }
     </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
+                    <img src="assets/logo.png" alt="CMB Logo" class="w-8 h-8 object-contain">
+                    <span class="font-bold text-2xl text-slate-900 tracking-tight">CM<span class="text-brand-600">B</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#" class="text-slate-600 hover:text-brand-600 font-medium transition-colors">Platform</a>
+                    <a href="#" class="text-slate-600 hover:text-brand-600 font-medium transition-colors">Solutions</a>
+                    <a href="#" class="text-slate-600 hover:text-brand-600 font-medium transition-colors">Pricing</a>
+                    <a href="#reviews" class="text-slate-600 hover:text-brand-600 font-medium transition-colors">Reviews</a>
+                    <a href="#contact" class="text-slate-600 hover:text-brand-600 font-medium transition-colors">Contact</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="#" class="text-slate-600 hover:text-slate-900 font-medium transition-colors">Sign in</a>
+                    <a href="https://app.cmfilings.com/CMB" class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2 rounded-lg font-medium transition-all shadow-sm shadow-brand-500/30">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                
+                <div class="text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 border border-brand-100 text-brand-600 text-sm font-medium mb-6">
+                        <span class="flex h-2 w-2 rounded-full bg-brand-600"></span>
+                        Introducing CMB Analytics 2.0
+                    </div>
+                    <h1 class="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
+                        Customise & Manage <br class="hidden md:block" />
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-600">your Business Work Flows.</span>
+                    </h1>
+                    <p class="mt-4 text-xl text-slate-600 mb-10 max-w-lg">
+                        The all-in-one corporate operating system designed to streamline your workflows, align your teams, and accelerate revenue growth.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="https://app.cmfilings.com/CMB" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-semibold text-lg transition-all shadow-lg shadow-brand-500/30 flex items-center justify-center gap-2">
+                            Start Free Trial
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"></path></svg>
+                        </a>
+                        <a href="https://wa.me/919946151111" target="_blank" rel="noopener noreferrer" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-8 py-3.5 rounded-xl font-semibold text-lg transition-all shadow-sm flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            Chat with us
+                        </a>
+                    </div>
+                </div>
+
+                <div class="relative w-full max-w-xl mx-auto lg:max-w-none mt-16 lg:mt-0">
+                    <div class="absolute -inset-4 bg-gradient-to-tr from-brand-100 to-indigo-50 rounded-2xl blur-lg opacity-60"></div>
+                    <div class="relative rounded-2xl border border-slate-200 bg-white shadow-2xl p-2">
+                        <img src="assets/photo-hero.png" alt="CMB Dashboard" class="rounded-xl border border-slate-100 w-full h-auto object-cover opacity-90">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 border-y border-slate-200 bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h3 class="text-[13px] font-bold text-slate-400/80 uppercase tracking-[0.15em] mb-12">Served Industries in India, GCC & UK</h3>
+            
+            <div class="flex flex-col items-center justify-center gap-12 opacity-70">
+                <div class="flex flex-wrap justify-center items-center gap-8 md:gap-20">
+                    <span class="text-3xl md:text-4xl font-bold font-serif text-slate-500">Service</span>
+                    <span class="text-3xl md:text-4xl font-bold font-sans tracking-tight text-slate-500">Construction</span>
+                    <span class="text-3xl md:text-4xl font-bold italic font-sans text-slate-500">Trading</span>
+                </div>
+                <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                    <span class="text-3xl md:text-4xl font-semibold font-sans uppercase tracking-[0.15em] text-slate-500">Healthcare</span>
+                    <span class="text-3xl md:text-4xl font-medium font-sans text-slate-500">Retail</span>
+                    <span class="text-3xl md:text-4xl font-black font-serif tracking-tighter text-slate-500">Manufacturing</span>
+                </div>
+                <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                    <span class="text-3xl md:text-4xl font-light font-sans tracking-widest text-slate-500">Hospitality</span>
+                    <span class="text-3xl md:text-4xl font-bold font-serif italic text-slate-500">Education</span>
+                    <span class="text-3xl md:text-4xl font-extrabold font-sans uppercase text-slate-500">Logistics</span>
+                </div>
+                <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                    <span class="text-3xl md:text-4xl font-medium font-serif text-slate-500">Professionals</span>
+                    <span class="text-3xl md:text-4xl font-bold font-sans tracking-tight text-slate-500">IT & Software</span>
+                    <span class="text-3xl md:text-4xl font-semibold italic font-sans text-slate-500">Distribution</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="reviews" class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Loved by teams globally</h2>
+                <p class="text-lg text-slate-600">Don't just take our word for it. Here's what industry leaders have to say about CMB.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm flex flex-col h-full">
+                    <svg class="w-8 h-8 text-yellow-400 mb-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+                    <p class="text-slate-600 mb-6 flex-grow leading-relaxed">"CMB has completely transformed how our operations communicate. The workflow customization is unmatched and has saved us countless hours."</p>
+                    <div>
+                        <p class="font-bold text-slate-900 text-lg">Eshanix</p>
+                        <p class="text-sm font-medium text-brand-600">India</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm flex flex-col h-full">
+                    <svg class="w-8 h-8 text-yellow-400 mb-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+                    <p class="text-slate-600 mb-6 flex-grow leading-relaxed">"The implementation was seamless. Having all our business data in one secure dashboard has streamlined our entire regional setup."</p>
+                    <div>
+                        <p class="font-bold text-slate-900 text-lg">Bizroot</p>
+                        <p class="text-sm font-medium text-brand-600">UAE</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm flex flex-col h-full">
+                    <svg class="w-8 h-8 text-yellow-400 mb-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+                    <p class="text-slate-600 mb-6 flex-grow leading-relaxed">"Excellent customer support and the UI is incredibly intuitive. A true game changer for managing diverse operational workflows."</p>
+                    <div>
+                        <p class="font-bold text-slate-900 text-lg">Commito</p>
+                        <p class="text-sm font-medium text-brand-600">UK</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 bg-[linear-gradient(135deg,#f1f5f9_50%,#ffffff_50%)] border-y border-slate-200 relative overflow-hidden">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Ready to transform your business?</h2>
+            <p class="text-slate-600 text-lg mb-8">Join over 10,000 companies using CMB to drive operational efficiency.</p>
+            <a href="https://app.cmfilings.com/CMB" class="inline-block bg-brand-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-700 transition-colors shadow-lg shadow-brand-500/30">
+                Get Started for Free
+            </a>
+        </div>
+    </section>
+
+    <footer id="contact" class="bg-white pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+                <div class="col-span-2 lg:col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img src="assets/logo.png" alt="CMB Logo" class="w-6 h-6 object-contain">
+                        <span class="font-bold text-xl text-slate-900">CM<span class="text-brand-600">B</span></span>
+                    </div>
+                    <p class="text-slate-500 text-sm leading-relaxed max-w-xs">
+                        Customise & Manage your Business Work Flows. Empowering modern enterprises with intelligent software solutions for a connected world.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-slate-900 mb-4">Product</h4>
+                    <ul class="space-y-3 text-sm text-slate-600">
+                        <li><a href="#" class="hover:text-brand-600 transition-colors">Features</a></li>
+                        <li><a href="#" class="hover:text-brand-600 transition-colors">Integrations</a></li>
+                        <li><a href="#" class="hover:text-brand-600 transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-brand-600 transition-colors">Changelog</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-slate-900 mb-4">Contact Us</h4>
+                    <ul class="space-y-4 text-sm text-slate-600">
+                        <li>
+                            <a href="https://cmb.cmfilings.com" class="hover:text-brand-600 transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                                cmb.cmfilings.com
+                            </a>
+                        </li>
+                        <li>
+                            <a href="mailto:cmb.cmfilings.com" class="hover:text-brand-600 transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m2 4 10 8 10-8"></path></svg>
+                                cmb.cmfilings.com
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tel:+919946151111" class="hover:text-brand-600 transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                +91 9946151111
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold text-slate-900 mb-4">Legal</h4>
+                    <ul class="space-y-3 text-sm text-slate-600">
+                        <li><a href="privacy.html" class="hover:text-brand-600 transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-brand-600 transition-colors">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-brand-600 transition-colors">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-slate-500 text-sm">© 2026 CMFilings. All rights reserved.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-slate-400 hover:text-brand-600 transition-colors">
+                        <span class="sr-only">Twitter</span>
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+                    </a>
+                    <a href="#" class="text-slate-400 hover:text-brand-600 transition-colors">
+                        <span class="sr-only">LinkedIn</span>
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>
