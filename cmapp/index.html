@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="CMB GSTR-1 converter with offline workbook and JSON export workflow.">
+    <title>CMB GSTR-1 Converter | Professional Corporate Solutions</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="assets/app-logo.svg" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 400: '#60a5fa',
+                            500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="css/gstr1-app.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-brand-500 selection:text-white overflow-x-hidden">
+
+    <aside id="desktop-sidebar" class="fixed inset-y-0 left-0 z-40 w-20 bg-white/80 backdrop-blur-xl border-r border-slate-200/50 shadow-sm flex flex-col overflow-hidden group sidebar-collapsed">
+        <div class="h-20 w-full flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-6 mb-2 border-b border-slate-100">
+            <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                <i data-lucide="layout-grid" class="w-5 h-5 text-white"></i>
+            </div>
+            <span class="ml-4 font-bold text-xl text-slate-900 tracking-tight hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 transition-opacity duration-300 whitespace-nowrap">CMB Tools</span>
+        </div>
+        <nav class="flex-1 w-full flex flex-col gap-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-4 px-2">
+            <button type="button" onclick="showView('dashboard')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 flex-shrink-0"></i>
+                <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Dashboard</span>
+            </button>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('company')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="building-2" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Company</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-company" class="submenu hidden pl-7 mt-1">
+                    <a href="clients.html" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Clients</a>
+                    <button type="button" onclick="showModule('branches')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Branches</button>
+                    <button type="button" onclick="showModule('bank')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Bank</button>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('accounts')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="wallet" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Accounts</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-accounts" class="submenu hidden pl-7 mt-1">
+                    <button type="button" onclick="showModule('ledgers')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Ledgers</button>
+                    <button type="button" onclick="showModule('vouchers')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Vouchers</button>
+                    <button type="button" onclick="showModule('inventory')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Inventory</button>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('bank')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="landmark" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Bank</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-bank" class="submenu hidden pl-7 mt-1">
+                    <button type="button" onclick="showModule('transactions')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Transactions</button>
+                    <button type="button" onclick="showModule('cheque-record')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Cheque Record</button>
+                    <button type="button" onclick="showModule('credentials')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Credentials</button>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('crm')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">CRM</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-crm" class="submenu hidden pl-7 mt-1">
+                    <button type="button" onclick="showModule('clients')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Clients</button>
+                    <button type="button" onclick="showModule('task')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Task</button>
+                    <button type="button" onclick="showModule('projects')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Projects</button>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('employees')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="badge-check" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Employees</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-employees" class="submenu hidden pl-7 mt-1">
+                    <button type="button" onclick="showModule('employees-data')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Employees Data</button>
+                    <button type="button" onclick="showModule('attendance')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Attendance</button>
+                    <button type="button" onclick="showModule('salary-chart')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Salary Chart</button>
+                    <button type="button" onclick="showModule('pay-slip')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Pay Slip</button>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('templates')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="file-stack" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Templates</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-templates" class="submenu hidden pl-7 mt-1">
+                    <button type="button" onclick="showModule('logo')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Logo</button>
+                    <button type="button" onclick="showModule('letter-head')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Letter Head</button>
+                    <button type="button" onclick="showModule('address-seal')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Address Seal</button>
+                    <button type="button" onclick="showModule('invoice')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Invoice</button>
+                    <button type="button" onclick="showModule('receipt-voucher')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Receipt Voucher</button>
+                    <button type="button" onclick="showModule('payment-voucher')" class="block w-full text-left py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Payment Voucher</button>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <nav id="top-nav" class="fixed w-full z-30 bg-white/70 backdrop-blur-lg border-b border-slate-200/50 shadow-sm h-20 flex items-center pl-20">
+        <div class="w-full px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="w-10 h-10 rounded-lg text-slate-500 hover:bg-slate-100 flex items-center justify-center transition-colors focus:outline-none">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="h-5 w-[1.5px] bg-slate-300 mx-1 hidden sm:block"></div>
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight hidden sm:flex items-center">
+                    GSTR-1 <span class="text-brand-600 ml-1">JSON Converter</span>
+                </h2>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="h-9 w-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm cursor-pointer hover:bg-slate-800 transition-colors">AC</div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content" class="pt-24 pb-28 md:pb-12 min-h-screen flex flex-col pl-20">
+        <div class="max-w-[1600px] mx-auto px-6 lg:px-8 w-full flex-1">
+            <div id="dashboardView" class="space-y-6 mt-4">
+                <div class="grid grid-cols-1 xl:grid-cols-[1.4fr_0.8fr] gap-6">
+                    <div class="bg-gradient-to-br from-brand-600 to-brand-900 rounded-3xl p-6 text-white shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.3em] text-blue-100">Today Overview</p>
+                                <h3 class="mt-2 text-3xl font-bold">CRM is moving smoothly</h3>
+                                <p class="mt-3 text-sm text-blue-100 max-w-xl">Track tasks, attendance, and client activity from one polished dashboard.</p>
+                            </div>
+                            <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-lg flex items-center justify-center">
+                                <i data-lucide="sparkles" class="w-8 h-8"></i>
+                            </div>
+                        </div>
+                        <div class="mt-6 grid grid-cols-3 gap-3 text-sm">
+                            <div class="bg-white/10 rounded-xl p-3"><div class="text-blue-100">Tasks</div><div class="mt-1 font-semibold text-lg">24</div></div>
+                            <div class="bg-white/10 rounded-xl p-3"><div class="text-blue-100">Clients</div><div class="mt-1 font-semibold text-lg">148</div></div>
+                            <div class="bg-white/10 rounded-xl p-3"><div class="text-blue-100">Attendance</div><div class="mt-1 font-semibold text-lg">92%</div></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-500">Attendance</p>
+                                <h3 class="text-xl font-bold text-slate-900">Weekly Focus</h3>
+                            </div>
+                            <span class="text-sm text-emerald-600 font-semibold">On track</span>
+                        </div>
+                        <div class="mt-5 flex items-center gap-5">
+                            <div class="w-28 h-28 rounded-full flex items-center justify-center" style="background: conic-gradient(#2563eb 0 92%, #e2e8f0 92% 100%);">
+                                <div class="w-20 h-20 rounded-full bg-white flex items-center justify-center text-xl font-bold text-slate-900">92%</div>
+                            </div>
+                            <div class="flex-1 space-y-3 text-sm text-slate-600">
+                                <div class="flex items-center justify-between"><span>Present</span><span class="font-semibold text-slate-900">46</span></div>
+                                <div class="flex items-center justify-between"><span>Late</span><span class="font-semibold text-slate-900">3</span></div>
+                                <div class="flex items-center justify-between"><span>Absent</span><span class="font-semibold text-slate-900">2</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6">
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-500">Task Calendar</p>
+                                <h3 class="text-xl font-bold text-slate-900">Upcoming Activities</h3>
+                            </div>
+                            <button type="button" onclick="showModule('task')" class="text-sm font-semibold text-brand-600">Open Task Form</button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="rounded-2xl border border-slate-200 p-3 bg-slate-50">
+                                <div class="text-sm font-semibold text-slate-900">Mon</div>
+                                <div class="mt-2 text-2xl font-bold text-brand-600">08</div>
+                                <p class="text-xs text-slate-500">Client review</p>
+                            </div>
+                            <div class="rounded-2xl border border-slate-200 p-3 bg-slate-50">
+                                <div class="text-sm font-semibold text-slate-900">Wed</div>
+                                <div class="mt-2 text-2xl font-bold text-brand-600">10</div>
+                                <p class="text-xs text-slate-500">Attendance audit</p>
+                            </div>
+                            <div class="rounded-2xl border border-slate-200 p-3 bg-slate-50">
+                                <div class="text-sm font-semibold text-slate-900">Fri</div>
+                                <div class="mt-2 text-2xl font-bold text-brand-600">12</div>
+                                <p class="text-xs text-slate-500">Invoice follow-up</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-500">Task Form</p>
+                                <h3 class="text-xl font-bold text-slate-900">Create quick task</h3>
+                            </div>
+                        </div>
+                        <form class="space-y-3">
+                            <input type="text" placeholder="Task title" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                            <textarea rows="3" placeholder="Add task details" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+                            <div class="flex gap-3">
+                                <input type="date" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                                <button type="button" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-[1fr_0.8fr] gap-6">
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-500">Performance</p>
+                                <h3 class="text-xl font-bold text-slate-900">Monthly progress chart</h3>
+                            </div>
+                        </div>
+                        <div class="flex items-end gap-3 h-40 mt-3">
+                            <div class="flex-1 flex flex-col items-center gap-2">
+                                <div class="w-full bg-slate-100 rounded-t-xl overflow-hidden" style="height: 120px;">
+                                    <div class="w-full bg-brand-500 rounded-t-xl" style="height: 70%;"></div>
+                                </div>
+                                <span class="text-xs text-slate-500">Jan</span>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center gap-2">
+                                <div class="w-full bg-slate-100 rounded-t-xl overflow-hidden" style="height: 120px;">
+                                    <div class="w-full bg-brand-500 rounded-t-xl" style="height: 88%;"></div>
+                                </div>
+                                <span class="text-xs text-slate-500">Feb</span>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center gap-2">
+                                <div class="w-full bg-slate-100 rounded-t-xl overflow-hidden" style="height: 120px;">
+                                    <div class="w-full bg-brand-500 rounded-t-xl" style="height: 64%;"></div>
+                                </div>
+                                <span class="text-xs text-slate-500">Mar</span>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center gap-2">
+                                <div class="w-full bg-slate-100 rounded-t-xl overflow-hidden" style="height: 120px;">
+                                    <div class="w-full bg-brand-500 rounded-t-xl" style="height: 92%;"></div>
+                                </div>
+                                <span class="text-xs text-slate-500">Apr</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-500">Daily Notes</p>
+                                <h3 class="text-xl font-bold text-slate-900">Priority items</h3>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-sm text-slate-600">
+                            <div class="rounded-xl border border-slate-200 p-3">Follow up with 3 pending client proposals.</div>
+                            <div class="rounded-xl border border-slate-200 p-3">Review employee leave summaries before noon.</div>
+                            <div class="rounded-xl border border-slate-200 p-3">Prepare expense vouchers for the finance team.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="moduleView" class="hidden mt-4">
+                <div id="modulePanel" class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5"></div>
+            </div>
+
+            <div id="converterView" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
+                    <div class="lg:col-span-4 space-y-6">
+                        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                            <h3 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider border-b border-slate-100 pb-2">1. Return Details</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">GSTIN</label>
+                                    <input type="text" id="gstinInput" value="32LEHPS2329C1ZK" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 uppercase">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Period (MMYYYY)</label>
+                                    <input type="text" id="fpInput" value="032026" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                            <h3 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider border-b border-slate-100 pb-2">2. Data Actions</h3>
+                            <div class="flex flex-col gap-3">
+                                <button onclick="document.getElementById('fileUpload').click()" class="w-full bg-slate-800 text-white py-3 rounded-lg text-sm font-bold shadow-md hover:bg-slate-900 transition-colors flex justify-center items-center gap-2">
+                                    <i data-lucide="upload" class="w-4 h-4"></i> Upload Offline Tool Excel
+                                </button>
+                                <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" class="hidden">
+                                <p class="text-[11px] text-slate-500 font-medium text-center mb-2 mt-1">Maps B2B, B2CS, CDNR, EXP, HSN, DOCS automatically.<br/>Reads headers from Row 4.</p>
+                                <div class="h-[1px] bg-slate-100 my-1"></div>
+                                <button id="btnDownloadSummary" class="w-full bg-white border border-slate-200 text-slate-700 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm flex justify-center items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                                    <i data-lucide="table" class="w-4 h-4 text-emerald-600"></i> Download Full Summary
+                                </button>
+                                <button id="btnDownloadFormattedWorkbook" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-bold shadow-md hover:bg-emerald-700 transition-colors flex justify-center items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Download Formatted Workbook
+                                </button>
+                                <button id="btnDownloadJSON" class="w-full bg-brand-600 text-white py-2.5 rounded-lg text-sm font-bold shadow-md hover:bg-brand-700 transition-colors flex justify-center items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                                    <i data-lucide="download" class="w-4 h-4"></i> Generate JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-8 flex flex-col gap-6">
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                            <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                    <i data-lucide="activity" class="w-4 h-4 text-brand-600"></i> Processing Summary
+                                </h3>
+                                <button onclick="clearWorkspace()" class="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors px-2 py-1 bg-red-50 rounded-md">Clear Data</button>
+                            </div>
+                            <div class="summary-container overflow-x-auto min-h-[300px]">
+                                <table class="w-full text-left text-[13px]">
+                                    <thead class="bg-slate-50">
+                                        <tr class="text-slate-500 font-semibold border-b border-slate-200">
+                                            <th class="px-4 py-3 whitespace-nowrap">Section</th>
+                                            <th class="px-4 py-3 text-center">Records</th>
+                                            <th class="px-4 py-3 text-right whitespace-nowrap">Taxable Val (₹)</th>
+                                            <th class="px-4 py-3 text-right">IGST (₹)</th>
+                                            <th class="px-4 py-3 text-right">CGST (₹)</th>
+                                            <th class="px-4 py-3 text-right">SGST (₹)</th>
+                                            <th class="px-4 py-3 text-right">Cess (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="summaryTableBody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                                        <tr><td colspan="7" class="text-center py-10 text-slate-400 italic">No data uploaded yet.</td></tr>
+                                    </tbody>
+                                    <tfoot class="bg-slate-50/50 border-t-2 border-slate-200 font-bold text-slate-900" id="summaryTableFoot"></tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/gstr1-app.js"></script>
+</body>
+</html>

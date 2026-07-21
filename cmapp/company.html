@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="description" content="CMB client management workspace." />
+    <title>Clients | CMB Tools</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="assets/app-logo.svg" type="image/svg+xml" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 400: '#60a5fa',
+                            500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="css/clients-app.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased overflow-x-hidden">
+    <aside id="desktop-sidebar" class="fixed inset-y-0 left-0 z-40 w-20 bg-white/80 backdrop-blur-xl border-r border-slate-200/50 shadow-sm flex flex-col overflow-hidden group sidebar-collapsed">
+        <div class="h-20 w-full flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-6 mb-2 border-b border-slate-100">
+            <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                <i data-lucide="layout-grid" class="w-5 h-5 text-white"></i>
+            </div>
+            <span class="ml-4 font-bold text-xl text-slate-900 tracking-tight hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 transition-opacity duration-300 whitespace-nowrap">CMB Tools</span>
+        </div>
+        <nav class="flex-1 w-full flex flex-col gap-1 overflow-y-auto overflow-x-hidden py-4 px-2">
+            <a href="cmtool-gstr1.html" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                <i data-lucide="wrench" class="w-5 h-5 flex-shrink-0"></i>
+                <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">GSTR-1 Tool</span>
+            </a>
+            <a href="clients.html" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors relative">
+                <i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i>
+                <span class="ml-4 font-bold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Clients</span>
+            </a>
+        </nav>
+    </aside>
+
+    <nav id="top-nav" class="fixed w-full z-30 bg-white/70 backdrop-blur-lg border-b border-slate-200/50 shadow-sm h-20 flex items-center pl-20">
+        <div class="w-full px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="w-10 h-10 rounded-lg text-slate-500 hover:bg-slate-100 flex items-center justify-center transition-colors focus:outline-none">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="h-5 w-[1.5px] bg-slate-300 mx-1 hidden sm:block"></div>
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight hidden sm:flex items-center">
+                    Client <span class="text-brand-600 ml-1">Management</span>
+                </h2>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="h-9 w-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm">AC</div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content" class="pt-24 pb-10 min-h-screen pl-20">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)] gap-6">
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Add Client</h3>
+                            <p class="text-sm text-slate-500">Fill the company details below</p>
+                        </div>
+                        <button type="button" onclick="resetForm()" class="text-sm text-slate-500 hover:text-brand-600">Reset</button>
+                    </div>
+
+                    <form id="clientForm" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Company ID</label>
+                                <input name="CompanyID" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="CMB-001" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Company Name</label>
+                                <input name="CompanyName" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="ABC Pvt Ltd" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Tagline</label>
+                                <input name="Tagline" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Your business tagline" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Constitution</label>
+                                <input name="Constitution" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Private Limited" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Address</label>
+                            <textarea name="Address" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Street / Building / Area"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">City</label>
+                                <input name="City" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Kochi" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">State</label>
+                                <input name="State" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Kerala" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Country</label>
+                                <input name="Country" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="India" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Pincode</label>
+                                <input name="Pincode" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="682001" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Mobile</label>
+                                <input name="Mobile" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="9876543210" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Email</label>
+                                <input name="Email" type="email" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="info@company.com" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Website</label>
+                                <input name="Website" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="www.company.com" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Financial Year</label>
+                                <input name="FinancialYear" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="2025-26" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Currency</label>
+                                <input name="Currency" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="INR" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Status</label>
+                                <select name="Status" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option value="Active">Active</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Authorized Signatory</label>
+                                <input name="AuthorizedSignatory" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Name of signatory" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Role</label>
+                                <input name="Role" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Director / Manager" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Date of Incorporation</label>
+                                <input name="DateOfIncorporation" type="date" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">GSTIN</label>
+                                <input name="Gstin" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="32AAAAA0000A1Z5" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">PAN</label>
+                                <input name="Pan" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="AAAAA0000A" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Created At</label>
+                                <input name="CreatedAt" type="date" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Notes</label>
+                            <textarea name="Notes" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Additional notes"></textarea>
+                        </div>
+
+                        <div class="flex items-center gap-3 pt-2">
+                            <button type="submit" class="flex-1 bg-brand-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-brand-700 transition-colors">Save Client</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Client Records</h3>
+                            <p class="text-sm text-slate-500">Search and filter saved companies</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input id="searchInput" type="text" placeholder="Search company / city / GSTIN" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                            <select id="statusFilter" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <option value="All">All Status</option>
+                                <option value="Active">Active</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-50 text-slate-600">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold">Company</th>
+                                    <th class="px-4 py-3 text-left font-semibold">City</th>
+                                    <th class="px-4 py-3 text-left font-semibold">GSTIN</th>
+                                    <th class="px-4 py-3 text-left font-semibold">Status</th>
+                                    <th class="px-4 py-3 text-left font-semibold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientTableBody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/clients-app.js"></script>
+</body>
+</html>

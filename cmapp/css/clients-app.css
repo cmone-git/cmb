@@ -1,0 +1,35 @@
+.submenu { transition: all 0.2s ease; }
+
+#app-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #eff6ff 0%, #2563eb 100%);
+    color: white;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+#app-splash.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#app-splash .card {
+    width: min(92vw, 360px);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.16);
+}
+
+#app-splash img {
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 14px;
+}

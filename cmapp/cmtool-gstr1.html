@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMB GSTR-1 Converter | Professional Corporate Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 400: '#60a5fa',
+                            500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .manual-table-container::-webkit-scrollbar, .summary-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .manual-table-container::-webkit-scrollbar-track, .summary-container::-webkit-scrollbar-track { background: #f8fafc; border-radius: 4px; }
+        .manual-table-container::-webkit-scrollbar-thumb, .summary-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .manual-table-container::-webkit-scrollbar-thumb:hover, .summary-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Sidebar transition helper */
+        #desktop-sidebar { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        #main-content, #top-nav { transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .submenu { transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-brand-500 selection:text-white overflow-x-hidden">
+
+    <aside id="desktop-sidebar" class="fixed inset-y-0 left-0 z-40 w-20 bg-white/80 backdrop-blur-xl border-r border-slate-200/50 shadow-sm flex flex-col overflow-hidden group sidebar-collapsed">
+        <div class="h-20 w-full flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-6 mb-2 border-b border-slate-100">
+            <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                <i data-lucide="layout-grid" class="w-5 h-5 text-white"></i>
+            </div>
+            <span class="ml-4 font-bold text-xl text-slate-900 tracking-tight hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 transition-opacity duration-300 whitespace-nowrap">CMB Tools</span>
+        </div>
+        <nav class="flex-1 w-full flex flex-col gap-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-4 px-2">
+            <a href="#" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 flex-shrink-0"></i>
+                <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Dashboard</span>
+            </a>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('company')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="building-2" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Company</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-company" class="submenu hidden pl-7 mt-1">
+                    <a href="clients.html" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Clients</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Branches</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Bank</a>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('accounts')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="wallet" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Accounts</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-accounts" class="submenu hidden pl-7 mt-1">
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Ledgers</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Vouchers</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Inventory</a>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('bank')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="landmark" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Bank</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-bank" class="submenu hidden pl-7 mt-1">
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Transactions</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Cheque Record</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Credentials</a>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('crm')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">CRM</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-crm" class="submenu hidden pl-7 mt-1">
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Clients</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Task</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Projects</a>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('employees')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="badge-check" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Employees</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-employees" class="submenu hidden pl-7 mt-1">
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Employees Data</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Attendance</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Salary Chart</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Pay Slip</a>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <button type="button" onclick="toggleSubmenu('templates')" class="w-full h-12 flex items-center justify-center group-[.sidebar-expanded]:justify-start group-[.sidebar-expanded]:px-4 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-slate-50 transition-colors relative">
+                    <i data-lucide="file-stack" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="ml-4 font-semibold text-sm hidden opacity-0 group-[.sidebar-expanded]:block group-[.sidebar-expanded]:opacity-100 whitespace-nowrap">Templates</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-auto hidden group-[.sidebar-expanded]:block text-slate-400"></i>
+                </button>
+                <div id="submenu-templates" class="submenu hidden pl-7 mt-1">
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Logo</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Letter Head</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Address Seal</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Invoice</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Receipt Voucher</a>
+                    <a href="#" class="block py-1.5 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors">Payment Voucher</a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <nav id="top-nav" class="fixed w-full z-30 bg-white/70 backdrop-blur-lg border-b border-slate-200/50 shadow-sm h-20 flex items-center pl-20">
+        <div class="w-full px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="w-10 h-10 rounded-lg text-slate-500 hover:bg-slate-100 flex items-center justify-center transition-colors focus:outline-none">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="h-5 w-[1.5px] bg-slate-300 mx-1 hidden sm:block"></div>
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight hidden sm:flex items-center">
+                    GSTR-1 <span class="text-brand-600 ml-1">JSON Converter</span>
+                </h2>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="h-9 w-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm cursor-pointer hover:bg-slate-800 transition-colors">AC</div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content" class="pt-24 pb-28 md:pb-12 min-h-screen flex flex-col pl-20">
+        <div class="max-w-[1600px] mx-auto px-6 lg:px-8 w-full flex-1">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
+                
+                <div class="lg:col-span-4 space-y-6">
+                    
+                    <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider border-b border-slate-100 pb-2">1. Return Details</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">GSTIN</label>
+                                <input type="text" id="gstinInput" value="32LEHPS2329C1ZK" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 uppercase">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Period (MMYYYY)</label>
+                                <input type="text" id="fpInput" value="032026" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider border-b border-slate-100 pb-2">2. Data Actions</h3>
+                        
+                        <div class="flex flex-col gap-3">
+                            <button onclick="document.getElementById('fileUpload').click()" class="w-full bg-slate-800 text-white py-3 rounded-lg text-sm font-bold shadow-md hover:bg-slate-900 transition-colors flex justify-center items-center gap-2">
+                                <i data-lucide="upload" class="w-4 h-4"></i> Upload Offline Tool Excel
+                            </button>
+                            <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" class="hidden">
+                            
+                            <p class="text-[11px] text-slate-500 font-medium text-center mb-2 mt-1">
+                                Maps B2B, B2CS, CDNR, EXP, HSN, DOCS automatically.<br/>Reads headers from Row 4.
+                            </p>
+
+                            <div class="h-[1px] bg-slate-100 my-1"></div>
+
+                            <button id="btnDownloadSummary" class="w-full bg-white border border-slate-200 text-slate-700 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm flex justify-center items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                                <i data-lucide="table" class="w-4 h-4 text-emerald-600"></i> Download Full Summary
+                            </button>
+
+                            <button id="btnDownloadFormattedWorkbook" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-bold shadow-md hover:bg-emerald-700 transition-colors flex justify-center items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Download Formatted Workbook
+                            </button>
+                            
+                            <button id="btnDownloadJSON" class="w-full bg-brand-600 text-white py-2.5 rounded-lg text-sm font-bold shadow-md hover:bg-brand-700 transition-colors flex justify-center items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                                <i data-lucide="download" class="w-4 h-4"></i> Generate JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-8 flex flex-col gap-6">
+                    
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                        <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="activity" class="w-4 h-4 text-brand-600"></i> Processing Summary
+                            </h3>
+                            <button onclick="clearWorkspace()" class="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors px-2 py-1 bg-red-50 rounded-md">Clear Data</button>
+                        </div>
+                        
+                        <div class="summary-container overflow-x-auto min-h-[300px]">
+                            <table class="w-full text-left text-[13px]">
+                                <thead class="bg-slate-50">
+                                    <tr class="text-slate-500 font-semibold border-b border-slate-200">
+                                        <th class="px-4 py-3 whitespace-nowrap">Section</th>
+                                        <th class="px-4 py-3 text-center">Records</th>
+                                        <th class="px-4 py-3 text-right whitespace-nowrap">Taxable Val (₹)</th>
+                                        <th class="px-4 py-3 text-right">IGST (₹)</th>
+                                        <th class="px-4 py-3 text-right">CGST (₹)</th>
+                                        <th class="px-4 py-3 text-right">SGST (₹)</th>
+                                        <th class="px-4 py-3 text-right">Cess (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="summaryTableBody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                                    <tr><td colspan="7" class="text-center py-10 text-slate-400 italic">No data uploaded yet.</td></tr>
+                                </tbody>
+                                <tfoot class="bg-slate-50/50 border-t-2 border-slate-200 font-bold text-slate-900" id="summaryTableFoot">
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // UI: Smooth Sidebar Toggle Logic
+        function toggleSidebar() {
+            const sidebar = document.getElementById('desktop-sidebar');
+            const mainContent = document.getElementById('main-content');
+            const topNav = document.getElementById('top-nav');
+            
+            const isExpanded = sidebar.classList.contains('sidebar-expanded');
+            
+            if (isExpanded) {
+                sidebar.classList.remove('sidebar-expanded', 'w-64');
+                sidebar.classList.add('sidebar-collapsed', 'w-20');
+                mainContent.classList.remove('pl-64');
+                mainContent.classList.add('pl-20');
+                topNav.classList.remove('pl-64');
+                topNav.classList.add('pl-20');
+            } else {
+                sidebar.classList.remove('sidebar-collapsed', 'w-20');
+                sidebar.classList.add('sidebar-expanded', 'w-64');
+                mainContent.classList.remove('pl-20');
+                mainContent.classList.add('pl-64');
+                topNav.classList.remove('pl-20');
+                topNav.classList.add('pl-64');
+            }
+            document.querySelectorAll('.submenu').forEach((submenu) => submenu.classList.add('hidden'));
+        }
+
+        function toggleSubmenu(id) {
+            const sidebar = document.getElementById('desktop-sidebar');
+            if (!sidebar.classList.contains('sidebar-expanded')) return;
+
+            const submenu = document.getElementById(`submenu-${id}`);
+            if (!submenu) return;
+
+            document.querySelectorAll('.submenu').forEach((item) => {
+                if (item.id !== submenu.id) item.classList.add('hidden');
+            });
+
+            submenu.classList.toggle('hidden');
+        }
+
+        // --- GSTR-1 OFFICIAL JSON MAPPING & CALCULATION LOGIC ---
+
+        const getBlankGstJson = () => ({
+            gstin: "", fp: "", version: "GST3.2.4", hash: "hash",
+            b2b: [], b2cs: [], nil: { inv: [] }, exp: [], cdnr: [],
+            doc_issue: { doc_det: [] }, hsn: { hsn_b2b: [] }
+        });
+
+        let finalGstJson = getBlankGstJson();
+
+        const blankStats = () => ({
+            b2b: { count: 0, txval: 0, igst: 0, cgst: 0, sgst: 0, cess: 0 },
+            b2cs: { count: 0, txval: 0, igst: 0, cgst: 0, sgst: 0, cess: 0 },
+            cdnr: { count: 0, txval: 0, igst: 0, cgst: 0, sgst: 0, cess: 0 },
+            exp: { count: 0, txval: 0, igst: 0, cgst: 0, sgst: 0, cess: 0 },
+            hsn: { count: 0, txval: 0, igst: 0, cgst: 0, sgst: 0, cess: 0 },
+            docs: { count: 0, txval: 0, igst: 0, cgst: 0, sgst: 0, cess: 0 }
+        });
+        
+        let stats = blankStats();
+
+        // Helper: Precision Math
+        const num2 = (val) => {
+            if (val === null || val === undefined || val === '') return 0;
+            const cleaned = String(val).replace(/[₹$,]/g, '').trim();
+            const match = cleaned.match(/-?\d+(?:\.\d+)?/);
+            const numeric = match ? parseFloat(match[0]) : parseFloat(cleaned);
+            return Number((Number.isFinite(numeric) ? numeric : 0).toFixed(2));
+        };
+
+        const normalizeKey = (k) => String(k ?? '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '');
+
+        const aliasMap = {
+            invoicenumber: ['invoiceno','invoicenum','invoice no','invoice no.','billno','billnumber','invnum','invno','invoiceno.'],
+            invoicedate: ['invoicedate','invoicedt','invoice date','billdate','docdate','dated'],
+            taxablevalue: ['taxablevalue','taxableamount','taxableamt','taxable','taxamount','taxableval','taxable value'],
+            invoicevalue: ['invoicevalue','invoiceamount','invoiceamt','amount','totalvalue','totalamount','netvalue','netamount','invoice val'],
+            placeofsupply: ['placeofsupply','placeofsupply','pos','state','supplystate','place of supply'],
+            rate: ['rate','taxrate','ratepercent','gstpercent','percentage','rt','rate %'],
+            cess: ['cess','cessamount','cessamt'],
+            integratedtax: ['integratedtax','igst','integratedtaxamount','igstamount'],
+            centraltax: ['centraltax','cgst','centraltaxamount','cgstamount'],
+            stateuttax: ['stateuttax','sgst','stateuttaxamount','sgstamount'],
+            recipient: ['recipient','gstin','gstinrecipient','consigneegstin','customergstin','gstinuinofrecipient'],
+            notenumber: ['notenumber','noteno','note num','notenum','dcino','debitcreditnote'],
+            notedate: ['notedate','notedt','dcidate'],
+            notevalue: ['notevalue','noteamount','amount','totalvalue','totvalue'],
+            natureofdocument: ['natureofdocument','documenttype','doctype','nature of document','doc type'],
+            exporttype: ['exporttype','exptype','export type','export']
+        };
+        
+        // Helper: Extract Data From Excel Row safely
+        const getKey = (row, ...possibleKeys) => {
+            const normalizedRow = Object.entries(row).reduce((acc, [k, v]) => {
+                acc[normalizeKey(k)] = v;
+                return acc;
+            }, {});
+
+            const candidateKeys = [...new Set(possibleKeys.flatMap(pk => {
+                const target = normalizeKey(pk);
+                return [target, ...(aliasMap[target] || [])];
+            }))];
+
+            for (let candidate of candidateKeys) {
+                if (normalizedRow[candidate] !== undefined) return normalizedRow[candidate];
+                const matchKey = Object.keys(normalizedRow).find(k => k.includes(candidate) || candidate.includes(k));
+                if (matchKey) return normalizedRow[matchKey];
+            }
+            return undefined;
+        };
+
+        function findHeaderRowIndex(rows) {
+            const keywords = ['invoice','gstin','recipient','taxable','rate','place','cess','amount','hsn','document','note','from','to','total','date'];
+            for (let i = 0; i < Math.min(rows.length, 10); i++) {
+                const joined = (rows[i] || []).filter(Boolean).join(' ').toLowerCase();
+                const score = keywords.reduce((sum, keyword) => sum + (joined.includes(keyword) ? 1 : 0), 0);
+                if (score >= 2) return i;
+            }
+            return 3;
+        }
+
+        function detectSectionFromHeaderRow(row) {
+            const joined = (row || []).filter(Boolean).join(' ').toLowerCase();
+            if (!joined) return null;
+            if ((joined.includes('invoice number') || joined.includes('invoice value') || joined.includes('gstin') && joined.includes('recipient')) && !joined.includes('note')) return 'b2b';
+            if (joined.includes('note number') || joined.includes('note date')) return 'cdnr';
+            if (joined.includes('export type') || joined.includes('shipping bill')) return 'exp';
+            if (joined.includes('nature of document') || joined.includes('sr. no. from')) return 'docs';
+            if (joined.includes('hsn') && joined.includes('description')) return 'hsn_b2b';
+            if (joined.includes('nil rated') || joined.includes('exempted') || joined.includes('non-gst')) return 'nil';
+            if ((joined.includes('place of supply') || joined.includes('type')) && joined.includes('taxable value') && !joined.includes('invoice')) return 'b2cs';
+            if ((joined.includes('net value of supplies') || joined.includes('e-commerce')) && joined.includes('integrated tax')) return 'b2cs';
+            return null;
+        }
+
+        function extractSheetRows(worksheet) {
+            const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+            if (!rows || rows.length === 0) return [];
+
+            const headerRowIndex = findHeaderRowIndex(rows);
+            const headerRow = rows[headerRowIndex] || [];
+
+            return rows.slice(headerRowIndex + 1).map((row) => {
+                const obj = {};
+                headerRow.forEach((header, index) => {
+                    const key = header !== undefined && header !== null && String(header).trim()
+                        ? String(header).trim()
+                        : `col${index + 1}`;
+                    obj[key] = row[index];
+                });
+                return obj;
+            }).filter((row) => Object.values(row).some((value) => value !== '' && value !== undefined && value !== null));
+        }
+
+        function extractSectionBlocks(worksheet) {
+            const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+            if (!rows || rows.length === 0) return [];
+
+            const blocks = [];
+            let currentSection = null;
+            let currentHeader = null;
+            let dataStartIndex = null;
+
+            rows.forEach((row, index) => {
+                const headerSection = detectSectionFromHeaderRow(row);
+                if (headerSection) {
+                    if (currentSection && currentHeader && dataStartIndex !== null) {
+                        const blockRows = rows.slice(dataStartIndex, index).map((dataRow) => {
+                            const obj = {};
+                            currentHeader.forEach((header, headerIndex) => {
+                                const key = header !== undefined && header !== null && String(header).trim()
+                                    ? String(header).trim()
+                                    : `col${headerIndex + 1}`;
+                                obj[key] = dataRow[headerIndex];
+                            });
+                            return obj;
+                        }).filter((dataRow) => Object.values(dataRow).some((value) => value !== '' && value !== undefined && value !== null));
+
+                        if (blockRows.length > 0) blocks.push({ section: currentSection, data: blockRows });
+                    }
+
+                    currentSection = headerSection;
+                    currentHeader = row;
+                    dataStartIndex = index + 1;
+                    return;
+                }
+            });
+
+            if (currentSection && currentHeader && dataStartIndex !== null) {
+                const blockRows = rows.slice(dataStartIndex).map((dataRow) => {
+                    const obj = {};
+                    currentHeader.forEach((header, headerIndex) => {
+                        const key = header !== undefined && header !== null && String(header).trim()
+                            ? String(header).trim()
+                            : `col${headerIndex + 1}`;
+                        obj[key] = dataRow[headerIndex];
+                    });
+                    return obj;
+                }).filter((dataRow) => Object.values(dataRow).some((value) => value !== '' && value !== undefined && value !== null));
+
+                if (blockRows.length > 0) blocks.push({ section: currentSection, data: blockRows });
+            }
+
+            return blocks;
+        }
+
+        // AUTO-CALCULATION ENGINE (Strictly based on POS vs State Code)
+        function calculateTaxes(txval, rt, pos, manualIamt, manualCamt, manualSamt) {
+            let myState = (document.getElementById('gstinInput').value || "32").trim().substring(0,2);
+            let targetPos = (pos || "").toString().split('-')[0].trim();
+            if(!targetPos) targetPos = myState; 
+
+            let isInterState = (targetPos !== myState);
+            let calcTotalTax = num2(txval * (rt / 100));
+            let taxes = {};
+
+            if (isInterState) {
+                let iamt = manualIamt ? num2(manualIamt) : calcTotalTax;
+                if(iamt > 0) taxes.iamt = iamt;
+            } else {
+                let halfTax = num2(calcTotalTax / 2);
+                let camt = manualCamt ? num2(manualCamt) : halfTax;
+                let samt = manualSamt ? num2(manualSamt) : halfTax;
+                if(camt > 0) taxes.camt = camt;
+                if(samt > 0) taxes.samt = samt;
+            }
+            return taxes;
+        }
+
+        // Trigger File Upload Processing
+        document.getElementById('fileUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                
+                const sheetMap = {
+                    'b2b': 'b2b', 'b2cs': 'b2cs', 'cdnr': 'cdnr', 'exp': 'exp', 'nil': 'nil',
+                    'hsn': 'hsn_b2b', 'docs': 'docs'
+                };
+
+                // Clear previous state
+                finalGstJson = getBlankGstJson();
+                stats = blankStats();
+                let processedAny = false;
+
+                workbook.SheetNames.forEach(sheetName => {
+                    const normName = sheetName.toLowerCase().trim();
+                    const worksheet = workbook.Sheets[sheetName];
+                    const blocks = extractSectionBlocks(worksheet);
+
+                    if (blocks.length > 0) {
+                        blocks.forEach(({ section, data }) => {
+                            routeDataToParser(section, data);
+                            processedAny = true;
+                        });
+                    } else if (sheetMap[normName]) {
+                        const jsonData = extractSheetRows(worksheet);
+                        if (jsonData.length > 0) {
+                            routeDataToParser(sheetMap[normName], jsonData);
+                            processedAny = true;
+                        }
+                    }
+                });
+
+                if(processedAny) {
+                    updateUIStats();
+                } else {
+                    alert("No valid data found. Ensure sheets are named B2B, B2CS, etc., and data starts from Row 4.");
+                }
+                document.getElementById('fileUpload').value = ""; 
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function routeDataToParser(section, data) {
+            if (section === 'b2b') processB2B(data);
+            else if (section === 'b2cs') processB2CS(data);
+            else if (section === 'cdnr') processCDNR(data);
+            else if (section === 'exp') processEXP(data);
+            else if (section === 'nil') processNIL(data);
+            else if (section === 'hsn_b2b') processHSN(data);
+            else if (section === 'docs') processDOCS(data);
+        }
+
+        // --- SECTION SPECIFIC OFFICIAL PARSERS ---
+
+        function processB2B(data) {
+            let map = {};
+            data.forEach(row => {
+                let gstin = getKey(row, "gstin", "recipient");
+                let inum = getKey(row, "invoice number");
+                let idt = getKey(row, "invoice date");
+                let pos = (getKey(row, "place of supply") || "").toString().split('-')[0].trim();
+                let rt = num2(getKey(row, "rate"));
+                let txval = num2(getKey(row, "taxable value", "taxable amount", "taxable amt"));
+                let csamt = num2(getKey(row, "cess"));
+                let val = num2(getKey(row, "invoice value", "invoice amount", "amount", "total value"));
+
+                if (txval <= 0 && val > 0) txval = val;
+                if (!gstin || !inum || (txval <= 0 && val <= 0)) return;
+
+                // Enforce auto CGST/SGST/IGST mapping
+                let taxes = calculateTaxes(txval, rt, pos, getKey(row, "integrated tax", "igst"), getKey(row, "central tax", "cgst"), getKey(row, "state/ut tax", "sgst"));
+                
+                // Fallback Invoice Value if missing
+                if (!val) val = num2(txval + (taxes.iamt || 0) + (taxes.camt || 0) + (taxes.samt || 0) + csamt);
+
+                if (!map[gstin]) map[gstin] = {};
+                if (!map[gstin][inum]) {
+                    map[gstin][inum] = { 
+                        inum, idt, val, pos, 
+                        rchrg: getKey(row, "reverse") || "N", 
+                        inv_typ: getKey(row, "invoice type") || "R", 
+                        itms: [] 
+                    };
+                    stats.b2b.count++;
+                }
+
+                let itm_det = { txval, rt, ...taxes, csamt };
+                let itemNum = map[gstin][inum].itms.length + 1;
+                map[gstin][inum].itms.push({ num: itemNum, itm_det });
+
+                stats.b2b.txval += txval; 
+                stats.b2b.igst += (taxes.iamt || 0); stats.b2b.cgst += (taxes.camt || 0); 
+                stats.b2b.sgst += (taxes.samt || 0); stats.b2b.cess += csamt;
+            });
+
+            for (const [ctin, invs] of Object.entries(map)) {
+                finalGstJson.b2b.push({ ctin, inv: Object.values(invs) });
+            }
+        }
+
+        function processB2CS(data) {
+            let myState = (document.getElementById('gstinInput').value || "32").trim().substring(0,2);
+            data.forEach(row => {
+                let pos = (getKey(row, "place of supply") || "").toString().split('-')[0].trim();
+                let txval = num2(getKey(row, "taxable value", "taxable amount", "taxable amt"));
+                let rt = num2(getKey(row, "rate"));
+                let csamt = num2(getKey(row, "cess"));
+                let invoiceNo = getKey(row, "invoice number", "invoice no", "bill no", "invoiceno");
+                let invoiceValue = num2(getKey(row, "invoice value", "invoice amount", "amount", "total value"));
+                let sply_ty = getKey(row, "type", "supply type") || (pos === myState ? "INTRA" : "INTER");
+
+                const hasB2CSignals = invoiceNo || invoiceValue > 0 || txval > 0;
+                if (!hasB2CSignals) return;
+                if (invoiceNo && invoiceValue > 0 && txval > 0) return;
+
+                if (txval > 0) {
+                    let taxes = calculateTaxes(txval, rt, pos, getKey(row, "integrated tax", "igst"), getKey(row, "central tax", "cgst"), getKey(row, "state/ut tax", "sgst"));
+                    finalGstJson.b2cs.push({ sply_ty, rt, typ: "OE", pos, txval, ...taxes, csamt });
+
+                    stats.b2cs.count++;
+                    stats.b2cs.txval += txval; stats.b2cs.igst += (taxes.iamt || 0);
+                    stats.b2cs.cgst += (taxes.camt || 0); stats.b2cs.sgst += (taxes.samt || 0); 
+                    stats.b2cs.cess += csamt;
+                }
+            });
+        }
+
+        function processCDNR(data) {
+            let map = {};
+            data.forEach(row => {
+                let gstin = getKey(row, "gstin", "recipient");
+                let nt_num = getKey(row, "note number");
+                let nt_dt = getKey(row, "note date");
+                let pos = (getKey(row, "place of supply") || "").toString().split('-')[0].trim();
+                let rt = num2(getKey(row, "rate"));
+                let txval = num2(getKey(row, "taxable value"));
+                let csamt = num2(getKey(row, "cess"));
+                let val = num2(getKey(row, "note value"));
+
+                if (!gstin || !nt_num || txval <= 0) return;
+
+                let taxes = calculateTaxes(txval, rt, pos, getKey(row, "integrated tax", "igst"), getKey(row, "central tax", "cgst"), getKey(row, "state/ut tax", "sgst"));
+                if (!val) val = num2(txval + (taxes.iamt || 0) + (taxes.camt || 0) + (taxes.samt || 0) + csamt);
+
+                if (!map[gstin]) map[gstin] = {};
+                if (!map[gstin][nt_num]) {
+                    map[gstin][nt_num] = { 
+                        nt_num, nt_dt, val, pos, 
+                        ntty: getKey(row, "note type") || "C", 
+                        rchrg: "N", inv_typ: "R", itms: [] 
+                    };
+                    stats.cdnr.count++;
+                }
+                
+                let itemNum = map[gstin][nt_num].itms.length + 1;
+                map[gstin][nt_num].itms.push({ num: itemNum, itm_det: { txval, rt, ...taxes, csamt }});
+
+                stats.cdnr.txval += txval; stats.cdnr.igst += (taxes.iamt || 0);
+                stats.cdnr.cgst += (taxes.camt || 0); stats.cdnr.sgst += (taxes.samt || 0); 
+                stats.cdnr.cess += csamt;
+            });
+
+            for (const [ctin, nts] of Object.entries(map)) {
+                finalGstJson.cdnr.push({ ctin, nt: Object.values(nts) });
+            }
+        }
+
+        function processEXP(data) {
+            let map = {};
+            data.forEach(row => {
+                let typ = getKey(row, "export type", "exp type") || "WOPAY";
+                let inum = getKey(row, "invoice number");
+                let idt = getKey(row, "invoice date");
+                let txval = num2(getKey(row, "taxable value"));
+                let rt = num2(getKey(row, "rate"));
+                let csamt = num2(getKey(row, "cess"));
+                
+                let iamt = num2(getKey(row, "integrated tax", "igst"));
+                if (typ === "WPAY" && !iamt) iamt = num2(txval * (rt/100));
+
+                let val = num2(getKey(row, "invoice value")) || num2(txval + iamt + csamt);
+
+                if (!inum || txval <= 0) return;
+                if (!map[typ]) map[typ] = {};
+                if (!map[typ][inum]) {
+                    map[typ][inum] = { inum, idt, val, itms: [] };
+                    stats.exp.count++;
+                }
+                
+                let itmObj = { num: map[typ][inum].itms.length + 1, itm_det: { txval, rt, csamt } };
+                if(iamt > 0) itmObj.itm_det.iamt = iamt;
+                map[typ][inum].itms.push(itmObj);
+
+                stats.exp.txval += txval; stats.exp.igst += iamt; stats.exp.cess += csamt;
+            });
+            for (const [exp_typ, invs] of Object.entries(map)) {
+                finalGstJson.exp.push({ exp_typ, inv: Object.values(invs) });
+            }
+        }
+
+        function processNIL(data) {
+            let invs = [];
+            data.forEach((row, index) => {
+                let inum = getKey(row, "invoice number", "inum");
+                let idt = getKey(row, "invoice date", "idt");
+                let val = num2(getKey(row, "invoice value", "val"));
+                let pos = getKey(row, "place of supply", "pos");
+                if (!inum || val <= 0) return;
+                invs.push({
+                    inum,
+                    idt,
+                    val,
+                    pos: (pos || '').toString().split('-')[0].trim(),
+                    ety: getKey(row, 'nature of supply', 'supply type') || 'OE',
+                    rt: num2(getKey(row, 'rate')),
+                    num: index + 1
+                });
+            });
+            if (invs.length > 0) {
+                finalGstJson.nil.inv = invs;
+            }
+        }
+
+        function processHSN(data) {
+            data.forEach((row, i) => {
+                let hsn_sc = (getKey(row, "hsn", "hsn code", "hsn/sc") || "").toString();
+                let txval = num2(getKey(row, "total value", "taxable value", "taxable amount", "amount"));
+                let rt = num2(getKey(row, "rate"));
+                let csamt = num2(getKey(row, "cess"));
+
+                let iamt = num2(getKey(row, "integrated tax", "igst"));
+                let camt = num2(getKey(row, "central tax", "cgst"));
+                let samt = num2(getKey(row, "state/ut tax", "sgst"));
+                let qty = num2(getKey(row, "total quantity", "qty", "quantity"));
+                let desc = getKey(row, "description", "item description", "goods description") || "Goods";
+                let uqc = getKey(row, "uqc", "unit") || "OTH";
+
+                const hasHsnSignals = hsn_sc && (txval > 0 || qty > 0 || desc || uqc);
+                if (!hasHsnSignals) return;
+
+                let obj = {
+                    num: i + 1, hsn_sc,
+                    desc,
+                    uqc,
+                    qty,
+                    rt, txval, iamt, samt, camt, csamt
+                };
+                finalGstJson.hsn.hsn_b2b.push(obj);
+
+                stats.hsn.count++;
+                stats.hsn.txval += txval; stats.hsn.igst += iamt;
+                stats.hsn.cgst += camt; stats.hsn.sgst += samt; stats.hsn.cess += csamt;
+            });
+        }
+
+        function processDOCS(data) {
+            let docMap = {};
+            data.forEach((row, i) => {
+                let doc_typ = getKey(row, "nature of document") || "Invoices for outward supply";
+                let from = (getKey(row, "from") || "").toString();
+                let to = (getKey(row, "to") || "").toString();
+                let totnum = parseInt(getKey(row, "total number")) || 0;
+                let cancel = parseInt(getKey(row, "cancelled")) || 0;
+                
+                if (from && totnum > 0) {
+                    if (!docMap[doc_typ]) docMap[doc_typ] = [];
+                    docMap[doc_typ].push({ num: i + 1, from, to, totnum, cancel, net_issue: totnum - cancel });
+                    stats.docs.count += totnum;
+                }
+            });
+
+            let dNum = 1;
+            for (const [doc_typ, docs] of Object.entries(docMap)) {
+                finalGstJson.doc_issue.doc_det.push({ doc_num: dNum++, doc_typ, docs });
+            }
+        }
+
+        // --- DASHBOARD UPDATES & EXPORTS ---
+
+        function clearWorkspace() {
+            if(confirm('Clear all processed memory?')) {
+                finalGstJson = getBlankGstJson();
+                stats = blankStats();
+                updateUIStats();
+                document.getElementById('fileUpload').value = "";
+            }
+        }
+
+        function updateUIStats() {
+            const tbody = document.getElementById('summaryTableBody');
+            const tfoot = document.getElementById('summaryTableFoot');
+            tbody.innerHTML = '';
+            
+            const sections = [
+                {id: 'b2b', label: 'B2B Invoices'}, {id: 'b2cs', label: 'B2C (Small)'},
+                {id: 'cdnr', label: 'Credit/Debit Notes'}, {id: 'exp', label: 'Exports'},
+                {id: 'hsn', label: 'HSN Summary'}, {id: 'docs', label: 'Documents Issued'}
+            ];
+
+            let tCount = 0, tTxval = 0, tIgst = 0, tCgst = 0, tSgst = 0, tCess = 0;
+
+            sections.forEach(sec => {
+                const s = stats[sec.id];
+                if (s.count === 0) return;
+
+                tCount += s.count; tTxval += s.txval; tIgst += s.igst;
+                tCgst += s.cgst; tSgst += s.sgst; tCess += s.cess;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-2 border-b border-slate-50 font-bold">${sec.label}</td>
+                        <td class="px-4 py-2 border-b border-slate-50 text-center bg-slate-50/50">${s.count}</td>
+                        <td class="px-4 py-2 border-b border-slate-50 text-right text-slate-900">${s.txval.toFixed(2)}</td>
+                        <td class="px-4 py-2 border-b border-slate-50 text-right">${s.igst.toFixed(2)}</td>
+                        <td class="px-4 py-2 border-b border-slate-50 text-right">${s.cgst.toFixed(2)}</td>
+                        <td class="px-4 py-2 border-b border-slate-50 text-right">${s.sgst.toFixed(2)}</td>
+                        <td class="px-4 py-2 border-b border-slate-50 text-right">${s.cess.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            if (tCount === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-slate-400 italic">No data processed yet.</td></tr>`;
+                tfoot.innerHTML = '';
+                document.getElementById('btnDownloadJSON').disabled = true;
+                document.getElementById('btnDownloadJSON').classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('btnDownloadSummary').disabled = true;
+                document.getElementById('btnDownloadSummary').classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('btnDownloadFormattedWorkbook').disabled = true;
+                document.getElementById('btnDownloadFormattedWorkbook').classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                tfoot.innerHTML = `
+                    <tr>
+                        <td class="px-4 py-3 uppercase tracking-wider text-xs">Total</td>
+                        <td class="px-4 py-3 text-center">${tCount}</td>
+                        <td class="px-4 py-3 text-right">${tTxval.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-right">${tIgst.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-right">${tCgst.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-right">${tSgst.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-right">${tCess.toFixed(2)}</td>
+                    </tr>
+                `;
+                document.getElementById('btnDownloadJSON').disabled = false;
+                document.getElementById('btnDownloadJSON').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('btnDownloadSummary').disabled = false;
+                document.getElementById('btnDownloadSummary').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('btnDownloadFormattedWorkbook').disabled = false;
+                document.getElementById('btnDownloadFormattedWorkbook').classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function styleSheet(ws, headerCount) {
+            ws['!cols'] = Array.from({ length: headerCount }, (_, index) => ({ wch: 18 }));
+            const headerStyle = { font: { bold: true, color: { rgb: 'FFFFFFFF' } }, fill: { fgColor: { rgb: 'FF2563EB' } }, alignment: { vertical: 'center' } };
+            const bodyStyle = { fill: { fgColor: { rgb: 'FFF8FAFC' } }, alignment: { vertical: 'center' } };
+            for (let c = 0; c < headerCount; c++) {
+                const headerRef = XLSX.utils.encode_cell({ r: 0, c });
+                if (ws[headerRef]) ws[headerRef].s = headerStyle;
+                for (let r = 1; r < 1000; r++) {
+                    const cellRef = XLSX.utils.encode_cell({ r, c });
+                    if (ws[cellRef]) ws[cellRef].s = bodyStyle;
+                }
+            }
+            ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+        }
+
+        function buildFormattedWorkbook() {
+            const gstin = document.getElementById('gstinInput').value.trim().toUpperCase();
+            const fp = document.getElementById('fpInput').value.trim();
+            const wb = XLSX.utils.book_new();
+
+            const addSheet = (sheetName, headers, rows) => {
+                const ws = XLSX.utils.aoa_to_sheet([[...headers], ...rows]);
+                styleSheet(ws, headers.length);
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            };
+
+            const summaryRows = [];
+            let totalCount = 0, totalTxval = 0, totalIgst = 0, totalCgst = 0, totalSgst = 0, totalCess = 0;
+            const sectionOrder = [
+                { key: 'b2b', label: 'B2B' },
+                { key: 'b2cs', label: 'B2CS' },
+                { key: 'cdnr', label: 'CDNR' },
+                { key: 'exp', label: 'EXP' },
+                { key: 'hsn', label: 'HSN' },
+                { key: 'docs', label: 'DOCS' }
+            ];
+            sectionOrder.forEach(({ key, label }) => {
+                const s = stats[key] || stats.docs;
+                if (!s || s.count <= 0) return;
+                summaryRows.push([label, s.count, s.txval.toFixed(2), s.igst.toFixed(2), s.cgst.toFixed(2), s.sgst.toFixed(2), s.cess.toFixed(2)]);
+                totalCount += s.count; totalTxval += s.txval; totalIgst += s.igst; totalCgst += s.cgst; totalSgst += s.sgst; totalCess += s.cess;
+            });
+            summaryRows.push(["TOTAL", totalCount, totalTxval.toFixed(2), totalIgst.toFixed(2), totalCgst.toFixed(2), totalSgst.toFixed(2), totalCess.toFixed(2)]);
+            addSheet('SummarySample', ['Section', 'Record Count', 'Taxable Value', 'IGST', 'CGST', 'SGST', 'CESS'], summaryRows);
+
+            const b2bRows = [];
+            finalGstJson.b2b.forEach(({ ctin, inv }) => {
+                inv.forEach((invoice) => {
+                    const base = { ctin: ctin || '', inum: invoice.inum || '', idt: invoice.idt || '', val: invoice.val || 0, pos: invoice.pos || '', rchrg: invoice.rchrg || '', inv_typ: invoice.inv_typ || '' };
+                    (invoice.itms || []).forEach((item, index) => {
+                        const det = item.itm_det || {};
+                        b2bRows.push([base.ctin, base.inum, base.idt, base.val, base.pos, base.rchrg, base.inv_typ, index + 1, det.rt || '', det.txval || '', det.iamt || '', det.camt || '', det.samt || '', det.csamt || '']);
+                    });
+                });
+            });
+            addSheet('B2B', ['Recipient GSTIN', 'Invoice No', 'Invoice Date', 'Invoice Value', 'Place of Supply', 'Reverse Charge', 'Invoice Type', 'Item No', 'Rate', 'Taxable Value', 'IGST', 'CGST', 'SGST', 'CESS'], b2bRows);
+
+            const b2csRows = [];
+            finalGstJson.b2cs.forEach((row) => {
+                b2csRows.push([row.sply_ty || '', row.rt || '', row.typ || '', row.pos || '', row.txval || '', row.iamt || '', row.camt || '', row.samt || '', row.csamt || '']);
+            });
+            addSheet('B2CS', ['Supply Type', 'Rate', 'Type', 'Place of Supply', 'Taxable Value', 'IGST', 'CGST', 'SGST', 'CESS'], b2csRows);
+
+            const cdnrRows = [];
+            finalGstJson.cdnr.forEach(({ ctin, nt }) => {
+                (nt || []).forEach((note) => {
+                    (note.itms || []).forEach((item, index) => {
+                        const det = item.itm_det || {};
+                        cdnrRows.push([ctin || '', note.nt_num || '', note.nt_dt || '', note.val || '', note.pos || '', note.ntty || '', note.rchrg || '', note.inv_typ || '', index + 1, det.rt || '', det.txval || '', det.iamt || '', det.camt || '', det.samt || '', det.csamt || '']);
+                    });
+                });
+            });
+            addSheet('CDNR', ['Recipient GSTIN', 'Note No', 'Note Date', 'Note Value', 'Place of Supply', 'Note Type', 'Reverse Charge', 'Invoice Type', 'Item No', 'Rate', 'Taxable Value', 'IGST', 'CGST', 'SGST', 'CESS'], cdnrRows);
+
+            const expRows = [];
+            finalGstJson.exp.forEach(({ exp_typ, inv }) => {
+                (inv || []).forEach((invoice) => {
+                    (invoice.itms || []).forEach((item, index) => {
+                        const det = item.itm_det || {};
+                        expRows.push([exp_typ || '', invoice.inum || '', invoice.idt || '', invoice.val || '', index + 1, det.rt || '', det.txval || '', det.iamt || '', det.csamt || '']);
+                    });
+                });
+            });
+            addSheet('EXP', ['Export Type', 'Invoice No', 'Invoice Date', 'Invoice Value', 'Item No', 'Rate', 'Taxable Value', 'IGST', 'CESS'], expRows);
+
+            const hsnRows = [];
+            (finalGstJson.hsn && finalGstJson.hsn.hsn_b2b || []).forEach((row) => {
+                hsnRows.push([row.hsn_sc || '', row.desc || '', row.uqc || '', row.qty || '', row.rt || '', row.txval || '', row.iamt || '', row.samt || '', row.camt || '', row.csamt || '']);
+            });
+            addSheet('HSN', ['HSN Code', 'Description', 'UQC', 'Quantity', 'Rate', 'Taxable Value', 'IGST', 'SGST', 'CGST', 'CESS'], hsnRows);
+
+            const nilRows = [];
+            (finalGstJson.nil && finalGstJson.nil.inv || []).forEach((row) => {
+                nilRows.push([row.inum || '', row.idt || '', row.val || '', row.pos || '', row.ety || '', row.rt || '', row.num || '']);
+            });
+            addSheet('NIL', ['Invoice No', 'Invoice Date', 'Invoice Value', 'Place of Supply', 'Nature of Supply', 'Rate', 'Serial No'], nilRows);
+
+            const docsRows = [];
+            finalGstJson.doc_issue && finalGstJson.doc_issue.doc_det.forEach((doc) => {
+                (doc.docs || []).forEach((entry) => {
+                    docsRows.push([doc.doc_typ || '', entry.from || '', entry.to || '', entry.totnum || '', entry.cancel || '', entry.net_issue || '']);
+                });
+            });
+            addSheet('DOCS', ['Document Type', 'From', 'To', 'Total Number', 'Cancelled', 'Net Issued'], docsRows);
+
+            XLSX.writeFile(wb, `GSTR1_Format_${fp || 'return'}_${gstin || 'GSTIN'}.xlsx`);
+        }
+
+        document.getElementById('btnDownloadJSON').addEventListener('click', () => {
+            finalGstJson.gstin = document.getElementById('gstinInput').value.trim().toUpperCase();
+            finalGstJson.fp = document.getElementById('fpInput').value.trim();
+            
+            // Strictly Clean Empty Arrays to match Government Tool rules
+            const clean = JSON.parse(JSON.stringify(finalGstJson));
+            ['b2b', 'b2cs', 'exp', 'cdnr'].forEach(k => { if (clean[k] && clean[k].length === 0) delete clean[k]; });
+            if (clean.nil && clean.nil.inv && clean.nil.inv.length === 0) delete clean.nil;
+            if (clean.hsn && clean.hsn.hsn_b2b.length === 0) delete clean.hsn;
+            if (clean.doc_issue && clean.doc_issue.doc_det && clean.doc_issue.doc_det.length === 0) delete clean.doc_issue;
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(clean));
+            const anchor = document.createElement('a');
+            anchor.setAttribute("href", dataStr);
+            anchor.setAttribute("download", `returns_${finalGstJson.fp}_R1_${finalGstJson.gstin}_offline.json`);
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+        });
+
+        document.getElementById('btnDownloadFormattedWorkbook').addEventListener('click', () => {
+            buildFormattedWorkbook();
+        });
+
+        document.getElementById('btnDownloadSummary').addEventListener('click', () => {
+            const gstin = document.getElementById('gstinInput').value.trim().toUpperCase();
+            const fp = document.getElementById('fpInput').value.trim();
+
+            let summaryRows = [];
+            summaryRows.push(["GSTR-1 Summary"]);
+            summaryRows.push(["GSTIN", gstin || ""]);
+            summaryRows.push(["Month/Year", fp || ""]);
+            summaryRows.push([]);
+            summaryRows.push(["Section", "Record Count", "Taxable Value", "IGST", "CGST", "SGST", "CESS"]);
+
+            let totalCount = 0, totalTxval = 0, totalIgst = 0, totalCgst = 0, totalSgst = 0, totalCess = 0;
+            for (const [key, s] of Object.entries(stats)) {
+                if (s.count > 0) {
+                    summaryRows.push([key.toUpperCase(), s.count, s.txval.toFixed(2), s.igst.toFixed(2), s.cgst.toFixed(2), s.sgst.toFixed(2), s.cess.toFixed(2)]);
+                    totalCount += s.count; totalTxval += s.txval; totalIgst += s.igst; totalCgst += s.cgst; totalSgst += s.sgst; totalCess += s.cess;
+                }
+            }
+
+            summaryRows.push(["TOTAL", totalCount, totalTxval.toFixed(2), totalIgst.toFixed(2), totalCgst.toFixed(2), totalSgst.toFixed(2), totalCess.toFixed(2)]);
+
+            const ws = XLSX.utils.aoa_to_sheet(summaryRows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "GSTR-1 Summary");
+
+            ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }];
+            ws['!cols'] = [
+                { wch: 18 }, { wch: 14 }, { wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }
+            ];
+
+            const boldStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'FFF1F5F9' } } };
+            const titleStyle = { font: { bold: true, sz: 14 }, fill: { fgColor: { rgb: 'FFE0F2FE' } } };
+
+            const applyStyle = (rowIndex, style) => {
+                for (let c = 0; c < 7; c++) {
+                    const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c });
+                    if (ws[cellRef]) ws[cellRef].s = style;
+                }
+            };
+
+            applyStyle(0, titleStyle);
+            applyStyle(4, boldStyle);
+            const totalRow = summaryRows.length - 1;
+            applyStyle(totalRow, boldStyle);
+
+            XLSX.writeFile(wb, `GSTR1_Summary_${fp || 'return'}.xlsx`);
+        });
+
+    </script>
+</body>
+</html>
